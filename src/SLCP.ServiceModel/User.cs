@@ -8,5 +8,9 @@ public class User
 
 	public string EmailAddress { get; set; }
 
+	public string LockAccessCode { get; set; }
+
 	public IList<LockGroup> PermittedLockGroups { get; set; }
+
+	public Organization Organization { get; set; }
 }

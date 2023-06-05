@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Handler\" />
+    <Folder Include="Handler\Notification\" />
+    <Folder Include="Notification\" />
+    <Folder Include="Response\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SLCP.DataAccess\SLCP.DataAccess.csproj" />
     <ProjectReference Include="..\SLCP.ServiceModel\SLCP.ServiceModel.csproj" />
   </ItemGroup>
 

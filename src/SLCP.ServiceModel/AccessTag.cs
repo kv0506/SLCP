@@ -6,8 +6,6 @@ public class AccessTag
 
 	public string Number { get; set; }
 
-	public bool IsActive { get; set; }
-
 	public bool IsBlocked { get; set; }
 
 	public User User { get; set; }

@@ -12,10 +12,7 @@
 
   <ItemGroup>
     <None Remove="raes52qy.es3~" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Contracts\" />
+    <None Remove="Repositories\AccessTagRepository.cs~RF10839d2a.TMP" />
   </ItemGroup>
 
   <ItemGroup>
