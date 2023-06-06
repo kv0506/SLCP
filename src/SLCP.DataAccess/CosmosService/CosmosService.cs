@@ -8,13 +8,12 @@ public class CosmosService : ICosmosService
     private readonly CosmosClient _cosmosClient;
     private readonly Database _database;
 
-    public CosmosService(string connectionString, string databaseName)
+    public CosmosService(CosmosSettings cosmosSettings)
     {
-        ArgumentNullException.ThrowIfNull(connectionString);
-        ArgumentNullException.ThrowIfNull(databaseName);
+        ArgumentNullException.ThrowIfNull(cosmosSettings);
 
-        _cosmosClient = new CosmosClient(connectionString);
-        _database = _cosmosClient.GetDatabase(databaseName);
+        _cosmosClient = new CosmosClient(cosmosSettings.ConnectionString);
+        _database = _cosmosClient.GetDatabase(cosmosSettings.DatabaseName);
     }
 
     public async Task<T> CreateItemAsync<T>(string containerName, T item, string? partitionKey, CancellationToken cancellationToken)

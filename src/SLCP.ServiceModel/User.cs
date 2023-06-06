@@ -8,6 +8,10 @@ public class User
 
 	public string EmailAddress { get; set; }
 
+	public string PasswordHash { get; set; }
+
+	public string PasswordSalt { get; set; }
+
 	public string LockAccessCode { get; set; }
 
 	public IList<LockGroup> PermittedLockGroups { get; set; }
