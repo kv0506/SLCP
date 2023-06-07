@@ -70,6 +70,6 @@ public class AccessTokenService : IAccessTokenService
 			return user;
 		}
 
-		throw new DomainException($"Invalid token {jwtToken}");
+		throw new AppBusinessException($"Invalid token {jwtToken}");
 	}
 }

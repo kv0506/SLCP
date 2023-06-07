@@ -42,7 +42,7 @@ public class ValidateLockAccessCommandHandler
 		var lockObj = await LockRepository.GetByIdAsync(lockId, null, cancellationToken);
 		if (lockObj == null)
 		{
-			throw new DomainException($"Lock [Id={lockId}] does not exist");
+			throw new AppBusinessException($"Lock [Id={lockId}] does not exist");
 		}
 
 		return lockObj;
@@ -53,7 +53,7 @@ public class ValidateLockAccessCommandHandler
 		var user = await UserRepository.GetByIdAsync(userId, orgId, cancellationToken);
 		if (user == null)
 		{
-			throw new DomainException($"User [Id={userId}] does not exist");
+			throw new AppBusinessException($"User [Id={userId}] does not exist");
 		}
 
 		return user;

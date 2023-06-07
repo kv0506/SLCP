@@ -2,7 +2,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
-using Microsoft.Extensions.Configuration;
+using SLCP.API.Middleware;
 using SLCP.Business;
 using SLCP.Business.Request;
 using SLCP.DataAccess;
@@ -37,7 +37,10 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.Services.GetService<IDataSeeder>().SeedData(CancellationToken.None);
+app.UseAppExceptionHandler();
+
+// used for setting up data for testing
+//app.Services.GetService<IDataSeeder>().SeedData(CancellationToken.None);
 
 if (app.Environment.IsDevelopment())
 {

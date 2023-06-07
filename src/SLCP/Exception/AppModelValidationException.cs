@@ -4,8 +4,8 @@ public class AppModelValidationException : System.Exception
 {
 	public AppModelValidationException(string message) : base(message)
 	{
-		Errors = new List<string?>();
+		Errors = new List<string>();
 	}
 
-	public List<string?> Errors { get; }
+	public List<string> Errors { get; }
 }

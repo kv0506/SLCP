@@ -57,7 +57,7 @@ public class DataSeeder : IDataSeeder
 			if(orgServerItem!=null)
 				return;
 		}
-		catch (Exception e)
+		catch (System.Exception e)
 		{
 			//ignore
 		}

@@ -54,7 +54,7 @@ public class ValidateLockAccessUsingAccessTagCommandHandler : ValidateLockAccess
 
         if (accessTag == null)
         {
-            throw new DomainException($"AccessTag [Id={accessTagId}] does not exist");
+            throw new AppBusinessException($"AccessTag [Id={accessTagId}] does not exist");
         }
 
         return accessTag;

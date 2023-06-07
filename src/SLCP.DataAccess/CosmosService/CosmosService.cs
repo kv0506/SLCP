@@ -1,5 +1,6 @@
 ﻿using CSharpExtensions;
 using Microsoft.Azure.Cosmos;
+using SLCP.DataAccess.Exception;
 
 namespace SLCP.DataAccess.CosmosService;
 
@@ -23,110 +24,154 @@ public class CosmosService : ICosmosService
 	public async Task CreateContainerIfNotExistsAsync(string containerName, string partitionKeyPath,
 		CancellationToken cancellationToken)
 	{
-		await _database.CreateContainerIfNotExistsAsync(containerName, partitionKeyPath,
-			cancellationToken: cancellationToken);
+		try
+		{
+			await _database.CreateContainerIfNotExistsAsync(containerName, partitionKeyPath,
+				cancellationToken: cancellationToken);
+		}
+		catch (CosmosException ex)
+		{
+			throw new AppDomainException("Container creation failed", ex);
+		}
 	}
 
 	public async Task<T> CreateItemAsync<T>(string containerName, T item, string? partitionKey,
 		CancellationToken cancellationToken)
 	{
-		var container = GetContainer(containerName);
-		if (container == null)
+		try
 		{
-			throw new Exception($"Container does not exist {containerName}");
-		}
+			var container = GetContainer(containerName);
+			if (container == null)
+			{
+				throw new AppDomainException($"Container does not exist {containerName}");
+			}
 
-		return (await container.CreateItemAsync(item: item, partitionKey: GetPartitionKey(partitionKey),
-			cancellationToken: cancellationToken)).Resource;
+			var response = await container.CreateItemAsync(item: item, partitionKey: GetPartitionKey(partitionKey),
+				cancellationToken: cancellationToken);
+
+			return response.Resource;
+		}
+		catch (CosmosException ex)
+		{
+			throw new AppDomainException($"Item creation failed in container [{containerName}]", ex);
+		}
 	}
 
 	public async Task<T> GetItemAsync<T>(string containerName, string itemId, string? partitionKey,
 		CancellationToken cancellationToken)
 	{
-		var container = GetContainer(containerName);
-		if (container == null)
+		try
 		{
-			throw new Exception($"Container does not exist {containerName}");
-		}
+			var container = GetContainer(containerName);
+			if (container == null)
+			{
+				throw new AppDomainException($"Container does not exist {containerName}");
+			}
 
-		return (await container.ReadItemAsync<T>(id: itemId, partitionKey: GetPartitionKey(partitionKey),
-			cancellationToken: cancellationToken)).Resource;
+			return await container.ReadItemAsync<T>(id: itemId, partitionKey: GetPartitionKey(partitionKey),
+				cancellationToken: cancellationToken);
+		}
+		catch (CosmosException ex)
+		{
+			throw new AppDomainException($"Unable to get the item [Id={itemId}] from the container [{containerName}]", ex);
+		}
 	}
 
 	public async Task<IList<T>> GetItemsAsync<T>(string containerName, string query, string? partitionKey,
 		CancellationToken cancellationToken)
 	{
-		var container = GetContainer(containerName);
-		if (container == null)
+		try
 		{
-			throw new Exception($"Container does not exist {containerName}");
-		}
-
-		var queryDefinition = new QueryDefinition(
-			query: query
-		);
-
-		using var queryResultSetIterator = container.GetItemQueryIterator<T>(
-			queryDefinition: queryDefinition, requestOptions: new QueryRequestOptions
+			var container = GetContainer(containerName);
+			if (container == null)
 			{
-				PartitionKey = GetPartitionKey(partitionKey)
+				throw new AppDomainException($"Container does not exist {containerName}");
 			}
-		);
 
-		var records = new List<T>();
+			var queryDefinition = new QueryDefinition(
+				query: query
+			);
 
-		while (queryResultSetIterator.HasMoreResults)
-		{
-			var response = await queryResultSetIterator.ReadNextAsync(cancellationToken);
-			records.AddRange(response);
+			using var queryResultSetIterator = container.GetItemQueryIterator<T>(
+				queryDefinition: queryDefinition, requestOptions: new QueryRequestOptions
+				{
+					PartitionKey = GetPartitionKey(partitionKey)
+				}
+			);
+
+			var records = new List<T>();
+
+			while (queryResultSetIterator.HasMoreResults)
+			{
+				var response = await queryResultSetIterator.ReadNextAsync(cancellationToken);
+				records.AddRange(response);
+			}
+
+			return records;
 		}
-
-		return records;
+		catch (CosmosException ex)
+		{
+			throw new AppDomainException($"Unable to get the items from the container [{containerName}]", ex);
+		}
 	}
 
 	public async Task<QueryResult<T>> GetItemsAsync<T>(string containerName, string query, int pageSize,
 		string? continuationToken,
 		string? partitionKey, CancellationToken cancellationToken)
 	{
-		var container = GetContainer(containerName);
-		if (container == null)
+		try
 		{
-			throw new Exception($"Container does not exist {containerName}");
-		}
-
-		var queryDefinition = new QueryDefinition(
-			query: query
-		);
-
-		using var queryResultSetIterator = container.GetItemQueryIterator<T>(
-			queryDefinition: queryDefinition, requestOptions: new QueryRequestOptions
+			var container = GetContainer(containerName);
+			if (container == null)
 			{
-				MaxItemCount = pageSize,
-				PartitionKey = GetPartitionKey(partitionKey)
-			},
-			continuationToken: continuationToken
-		);
+				throw new AppDomainException($"Container does not exist {containerName}");
+			}
 
-		var queryResult = new QueryResult<T>();
+			var queryDefinition = new QueryDefinition(
+				query: query
+			);
 
-		var response = await queryResultSetIterator.ReadNextAsync(cancellationToken);
-		queryResult.Records = response.ToList();
-		queryResult.ContinuationToken = response.ContinuationToken;
+			using var queryResultSetIterator = container.GetItemQueryIterator<T>(
+				queryDefinition: queryDefinition, requestOptions: new QueryRequestOptions
+				{
+					MaxItemCount = pageSize,
+					PartitionKey = GetPartitionKey(partitionKey)
+				},
+				continuationToken: continuationToken
+			);
 
-		return queryResult;
+			var queryResult = new QueryResult<T>();
+
+			var response = await queryResultSetIterator.ReadNextAsync(cancellationToken);
+			queryResult.Records = response.ToList();
+			queryResult.ContinuationToken = response.ContinuationToken;
+
+			return queryResult;
+		}
+		catch (CosmosException ex)
+		{
+			throw new AppDomainException($"Unable to get the items from the container [{containerName}]", ex);
+		}
 	}
 
 	public async Task<T> UpsertItemAsync<T>(string containerName, T item, string? partitionKey,
 		CancellationToken cancellationToken)
 	{
-		var container = GetContainer(containerName);
-		if (container == null)
+		try
 		{
-			throw new Exception($"Container does not exist {containerName}");
-		}
+			var container = GetContainer(containerName);
+			if (container == null)
+			{
+				throw new AppDomainException($"Container does not exist {containerName}");
+			}
 
-		return (await container.UpsertItemAsync(item: item, partitionKey: GetPartitionKey(partitionKey),
-			cancellationToken: cancellationToken)).Resource;
+			return (await container.UpsertItemAsync(item: item, partitionKey: GetPartitionKey(partitionKey),
+				cancellationToken: cancellationToken)).Resource;
+		}
+		catch (CosmosException ex)
+		{
+			throw new AppDomainException($"Unable to create or insert the item in the container [{containerName}]", ex);
+		}
 	}
 
 	private Container GetContainer(string containerName)

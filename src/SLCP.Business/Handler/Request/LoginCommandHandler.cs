@@ -23,7 +23,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 		var user = await _userRepository.GetByEmailAsync(request.Email, null, cancellationToken);
 		if (user == null)
 		{
-			throw new DomainException("Invalid email address or password");
+			throw new AppBusinessException("Invalid email address or password");
 		}
 
 		if (HashService.VerifyHash(request.Password, user.PasswordSalt, user.PasswordHash))
@@ -35,6 +35,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 			};
 		}
 
-		throw new DomainException("Invalid email address or password");
+		throw new AppBusinessException("Invalid email address or password");
 	}
 }
