@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SLCP.API.Model;
 using SLCP.Business.Request;
 
 namespace SLCP.API.Controllers
@@ -18,11 +19,15 @@ namespace SLCP.API.Controllers
 		[HttpPost]
 		[AllowAnonymous]
 		[Route("login")]
-		public async Task<IActionResult> SignIn([FromBody] LoginCommand request)
+		public async Task<IActionResult> SignIn([FromBody] Login request)
 		{
 			if (ModelState.IsValid)
 			{
-				var result = await _mediator.Send(request);
+				var result = await _mediator.Send(new LoginCommand
+				{
+					Email = request.Email,
+					Password = request.Password,
+				});
 				return Ok(result);
 			}
 

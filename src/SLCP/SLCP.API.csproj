@@ -18,6 +18,8 @@
     <Folder Include="Model\" />
     <Folder Include="Exception\" />
     <Folder Include="Middleware\" />
+    <Folder Include="Security\Authentication\" />
+    <Folder Include="Security\Authorization\" />
   </ItemGroup>
 
   <ItemGroup>

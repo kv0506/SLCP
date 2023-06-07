@@ -2,9 +2,12 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection;
 using MediatR.Extensions.Autofac.DependencyInjection.Builder;
+using SLCP.API;
 using SLCP.API.Middleware;
+using SLCP.API.Security.Attributes;
 using SLCP.Business;
 using SLCP.Business.Request;
+using SLCP.Business.Services;
 using SLCP.DataAccess;
 using SLCP.DataAccess.CosmosService;
 
@@ -21,6 +24,7 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 
 		containerBuilder.RegisterMediatR(configuration);
 
+		containerBuilder.RegisterModule(new ApiModule());
 		containerBuilder.RegisterModule(new DataAccessModule());
 		containerBuilder.RegisterModule(new BusinessModule());
 
@@ -28,10 +32,18 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 		builder.Configuration.GetSection(CosmosSettings.SectionName).Bind(cosmosSettings);
 		containerBuilder.RegisterInstance(cosmosSettings).As<CosmosSettings>();
 
+		var accessTokenServiceSettings = new AccessTokenServiceSettings();
+		builder.Configuration.GetSection(AccessTokenServiceSettings.SectionName).Bind(accessTokenServiceSettings);
+		containerBuilder.RegisterInstance(accessTokenServiceSettings).As<AccessTokenServiceSettings>();
+
 		containerBuilder.RegisterType<CosmosService>().As<ICosmosService>().InstancePerDependency();
 	});
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+	options.Filters.Add(typeof(ProtectAttribute));
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -49,8 +61,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 

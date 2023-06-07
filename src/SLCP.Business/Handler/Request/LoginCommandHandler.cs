@@ -28,7 +28,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 
 		if (HashService.VerifyHash(request.Password, user.PasswordSalt, user.PasswordHash))
 		{
-			var accessToken = _accessTokenService.CreateToken(user, string.Empty, 60);
+			var accessToken = _accessTokenService.CreateToken(user);
 			return new LoginResponse
 			{
 				AccessToken = accessToken

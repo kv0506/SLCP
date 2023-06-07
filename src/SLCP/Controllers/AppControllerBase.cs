@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CSharpExtensions;
+using Microsoft.AspNetCore.Mvc;
 using SLCP.API.Exception;
 using SLCP.API.Model;
 
@@ -18,11 +19,11 @@ public class AppControllerBase : ControllerBase
 
 		foreach (var modelState in ModelState)
 		{
-			if (!string.IsNullOrWhiteSpace(modelState.Key))
+			if (modelState.Key.IsNotNullOrWhiteSpace())
 			{
 				foreach (var err in modelState.Value.Errors)
 				{
-					validationException.Errors.Add(!string.IsNullOrWhiteSpace(err.ErrorMessage)
+					validationException.Errors.Add(err.ErrorMessage.IsNotNullOrWhiteSpace()
 						? err.ErrorMessage
 						: err.Exception?.Message);
 				}

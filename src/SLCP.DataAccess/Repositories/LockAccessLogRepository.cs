@@ -8,8 +8,6 @@ namespace SLCP.DataAccess.Repositories;
 
 public class LockAccessLogRepository : ILockAccessLogRepository
 {
-	private const string ContainerName = "lock-access-logs";
-
 	private readonly ICosmosService _cosmosService;
 
 	public LockAccessLogRepository(ICosmosService cosmosService)
@@ -19,7 +17,7 @@ public class LockAccessLogRepository : ILockAccessLogRepository
 
 	public async Task<LockAccessLog> CreateItemAsync(LockAccessLog accessLog, CancellationToken cancellationToken)
 	{
-		return await _cosmosService.CreateItemAsync(ContainerName, accessLog,
+		return await _cosmosService.CreateItemAsync(ContainerNames.LockAccessLogs, accessLog,
 			accessLog.Lock.OrganizationId.ToHyphens(), cancellationToken);
 	}
 
@@ -38,6 +36,6 @@ public class LockAccessLogRepository : ILockAccessLogRepository
 			queryBuilder.Append($" {(lockId.IsNotNullOrEmpty() ? "AND" : "WHERE")} c.user.id = {userId?.ToHyphens()}");
 		}
 
-		return await _cosmosService.GetItemsAsync<LockAccessLog>(ContainerName, queryBuilder.ToString(), maxIemCount, continuationToken, orgId?.ToHyphens(), cancellationToken);
+		return await _cosmosService.GetItemsAsync<LockAccessLog>(ContainerNames.LockAccessLogs, queryBuilder.ToString(), maxIemCount, continuationToken, orgId?.ToHyphens(), cancellationToken);
 	}
 }

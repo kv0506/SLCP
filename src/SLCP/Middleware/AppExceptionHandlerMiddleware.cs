@@ -1,6 +1,7 @@
 ﻿using SLCP.API.Exception;
 using System.Net;
 using System.Runtime.ExceptionServices;
+using System.Security.Authentication;
 using System.Text.Json;
 using SLCP.API.Model;
 using SLCP.Business.Exception;
@@ -81,18 +82,11 @@ public class AppExceptionHandlerMiddleware
 				status = 400;
 				response.Errors = new List<string> { domainEx.Message };
 			}
-			//else if (exception.SourceException is AuthenticationException authenticationEx)
-			//{
-			//	status = 401;
-			//	response.ErrorDetail.ErrorCode = "AuthenticationFailed";
-			//	response.ErrorDetail.Message = authenticationEx.Message;
-			//}
-			//else if (exception.SourceException is AuthorizationException authorizationEx)
-			//{
-			//	status = 403;
-			//	response.ErrorDetail.ErrorCode = "AuthorizationFailed";
-			//	response.ErrorDetail.Message = authorizationEx.Message;
-			//}
+			else if (exception.SourceException is AuthenticationException authenticationEx)
+			{
+				status = 401;
+				response.Errors = new List<string> { authenticationEx.Message };
+			}
 
 			context.Response.StatusCode = status;
 			await context.Response.WriteAsync(JsonSerializer.Serialize(response));

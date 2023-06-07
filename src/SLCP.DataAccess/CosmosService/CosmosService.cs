@@ -77,6 +77,31 @@ public class CosmosService : ICosmosService
 		}
 	}
 
+	public async Task<T> GetItemAsync<T>(string containerName, string query, CancellationToken cancellationToken)
+	{
+		try
+		{
+			var container = GetContainer(containerName);
+			if (container == null)
+			{
+				throw new AppDomainException($"Container does not exist {containerName}");
+			}
+
+			var response = container.GetItemQueryIterator<T>(query);
+			if (response.HasMoreResults)
+			{
+				var itemResponse = await response.ReadNextAsync(cancellationToken);
+				return itemResponse.Resource.FirstOrDefault();
+			}
+		}
+		catch (CosmosException ex)
+		{
+			throw new AppDomainException($"Unable to get the item from the container [{containerName}]", ex);
+		}
+
+		return default;
+	}
+
 	public async Task<IList<T>> GetItemsAsync<T>(string containerName, string query, string? partitionKey,
 		CancellationToken cancellationToken)
 	{
@@ -182,6 +207,6 @@ public class CosmosService : ICosmosService
 
 	private PartitionKey GetPartitionKey(string? partitionKey)
 	{
-		return partitionKey.IsNullOrEmpty() ? new PartitionKey("c590db46-2338-44da-8093-08b8b08ee2b6") : new PartitionKey(partitionKey);
+		return partitionKey.IsNullOrEmpty() ? PartitionKey.Null : new PartitionKey(partitionKey);
 	}
 }

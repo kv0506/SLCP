@@ -6,8 +6,6 @@ namespace SLCP.DataAccess.Repositories;
 
 public class LockRepository : ILockRepository
 {
-	private const string ContainerName = "locks";
-
 	private readonly ICosmosService _cosmosService;
 
 	public LockRepository(ICosmosService cosmosService)
@@ -17,13 +15,13 @@ public class LockRepository : ILockRepository
 
 	public async Task<Lock> GetByIdAsync(Guid id, Guid? orgId, CancellationToken cancellationToken)
 	{
-		return await _cosmosService.GetItemAsync<Lock>(ContainerName, id.ToHyphens(), orgId?.ToHyphens(),
+		return await _cosmosService.GetItemAsync<Lock>(ContainerNames.Locks, id.ToHyphens(), orgId?.ToHyphens(),
 			cancellationToken);
 	}
 
 	public async Task<IList<Lock>> GetByOrganizationIdAsync(Guid orgId, CancellationToken cancellationToken)
 	{
 		var query = "SELECT * FROM c";
-		return await _cosmosService.GetItemsAsync<Lock>(ContainerName, query, orgId.ToHyphens(), cancellationToken);
+		return await _cosmosService.GetItemsAsync<Lock>(ContainerNames.Locks, query, orgId.ToHyphens(), cancellationToken);
 	}
 }

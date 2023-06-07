@@ -12,6 +12,8 @@ public class User
 
 	public string PasswordSalt { get; set; }
 
+	public string Role { get; set; }
+
 	public string LockAccessCode { get; set; }
 
 	public IList<LockGroup> PermittedLockGroups { get; set; }

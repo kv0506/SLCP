@@ -6,8 +6,6 @@ namespace SLCP.DataAccess.Repositories;
 
 public class LockGroupRepository : ILockGroupRepository
 {
-    private const string ContainerName = "lock-groups";
-
     private readonly ICosmosService _cosmosService;
 
     public LockGroupRepository(ICosmosService cosmosService)
@@ -17,7 +15,7 @@ public class LockGroupRepository : ILockGroupRepository
 
     public async Task<LockGroup> GetByIdAsync(Guid id, Guid? orgId, CancellationToken cancellationToken)
     {
-		return await _cosmosService.GetItemAsync<LockGroup>(ContainerName, id.ToHyphens(), orgId?.ToHyphens(),
+		return await _cosmosService.GetItemAsync<LockGroup>(ContainerNames.LockGroups, id.ToHyphens(), orgId?.ToHyphens(),
 			cancellationToken);
 	}
 
@@ -25,6 +23,6 @@ public class LockGroupRepository : ILockGroupRepository
     {
         var query = "SELECT * FROM c WHERE ARRAY_CONTAINS(c.locks, {id: '" + lockId.ToHyphens() +
                     "'}, true)";
-        return await _cosmosService.GetItemsAsync<LockGroup>(ContainerName, query, orgId?.ToHyphens(), cancellationToken);
+        return await _cosmosService.GetItemsAsync<LockGroup>(ContainerNames.LockGroups, query, orgId?.ToHyphens(), cancellationToken);
     }
 }

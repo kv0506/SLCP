@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Handler\Notification\" />
-    <Folder Include="Services\" />
     <Folder Include="Notification\" />
     <Folder Include="Response\" />
   </ItemGroup>

@@ -27,6 +27,8 @@ public class DataSeeder : IDataSeeder
 	private async Task CreateContainers(CancellationToken cancellationToken)
 	{
 		await _cosmosService.CreateContainerIfNotExistsAsync(ContainerNames.Organizations, "/id", cancellationToken);
+		await _cosmosService.CreateContainerIfNotExistsAsync(ContainerNames.ApiKey, "/id",
+			cancellationToken);
 		await _cosmosService.CreateContainerIfNotExistsAsync(ContainerNames.Users, "/organizationId",
 			cancellationToken);
 		await _cosmosService.CreateContainerIfNotExistsAsync(ContainerNames.Locks, "/organizationId",
@@ -65,6 +67,15 @@ public class DataSeeder : IDataSeeder
 		await _cosmosService.UpsertItemAsync(ContainerNames.Organizations,
 			org, org.Id.ToHyphens(), cancellationToken);
 
+		await _cosmosService.UpsertItemAsync(ContainerNames.ApiKey,
+			new ApiKey
+			{
+				Id = Guid.Parse("66c00ba1-5162-40ac-88c1-9e09260c24b7"),
+				Name = "Test",
+				Key = "518b4ea4f25449f68d29e22350b047cb",
+				OrganizationId = org.Id
+			}, "66c00ba1-5162-40ac-88c1-9e09260c24b7", cancellationToken);
+
 		var lock1 = CreateNewLock("Door1", org);
 		var lock2 = CreateNewLock("Door2", org);
 		var lock3 = CreateNewLock("Door3", org);
@@ -90,9 +101,9 @@ public class DataSeeder : IDataSeeder
 		await _cosmosService.UpsertItemAsync(ContainerNames.LockGroups,
 			lockGroup2, org.Id.ToHyphens(), cancellationToken);
 
-		var user1 = CreateNewUser("TestUser1", org, lockGroup1);
-		var user2 = CreateNewUser("TestUser2", org, lockGroup1);
-		var user3 = CreateNewUser("TestUser3", org, lockGroup1, lockGroup2);
+		var user1 = CreateNewUser("TestUser1", Roles.Employee, org, lockGroup1);
+		var user2 = CreateNewUser("TestUser2", Roles.Employee, org, lockGroup1);
+		var user3 = CreateNewUser("TestUser3", Roles.SecurityAdmin, org, lockGroup1, lockGroup2);
 
 		await _cosmosService.UpsertItemAsync(ContainerNames.Users,
 			user1, org.Id.ToHyphens(), cancellationToken);
@@ -124,7 +135,7 @@ public class DataSeeder : IDataSeeder
 		};
 	}
 
-	private User CreateNewUser(string name, Organization org, params LockGroup[] lockGroups)
+	private User CreateNewUser(string name, string role, Organization org, params LockGroup[] lockGroups)
 	{
 		var user = new User
 		{
@@ -134,6 +145,7 @@ public class DataSeeder : IDataSeeder
 			PasswordSalt = "5691519521109491810",
 			PasswordHash = "BPH1G3qA03QhhrFU/kANIf0PEKJP6jUpRSHZhp5Iwo4=",
 			LockAccessCode = "12345678",
+			Role = role,
 			OrganizationId = org.Id,
 			PermittedLockGroups = new List<LockGroup>()
 		};

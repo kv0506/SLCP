@@ -2,35 +2,44 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using SLCP.Business.Exception;
+using SLCP.DataAccess;
 using SLCP.ServiceModel;
 
 namespace SLCP.Business.Services;
 
 public interface IAccessTokenService
 {
-	string CreateToken(User user, string secret, int expiryInMinutes);
-	User DecodeToken(string jwtToken);
+	string CreateToken(User user);
+	User? DecodeToken(string jwtToken);
 }
 
 public class AccessTokenService : IAccessTokenService
 {
-	private const string OrganizationClaim = "Organization";
+	private const string Id = "id";
+	private const string Role = "role";
+	private const string OrganizationClaim = "organization";
 
-	public string CreateToken(User user, string secret, int expiryInMinutes)
+	private readonly AccessTokenServiceSettings _settings;
+
+	public AccessTokenService(AccessTokenServiceSettings settings)
+	{
+		_settings = settings;
+	}
+
+	public string CreateToken(User user)
 	{
 		var tokenHandler = new JwtSecurityTokenHandler();
-		var key = Encoding.ASCII.GetBytes(secret);
+		var key = Encoding.ASCII.GetBytes(_settings.Secret);
 
 		var tokenDescriptor = new SecurityTokenDescriptor
 		{
 			Subject = new ClaimsIdentity(new[]
 			{
-				new Claim(ClaimTypes.NameIdentifier, user.Id.ToString("D")),
-				new Claim(ClaimTypes.Email, user.EmailAddress),
-				new Claim(OrganizationClaim, user.OrganizationId.ToString("D"))
+				new Claim(Id, user.Id.ToHyphens()),
+				new Claim(Role, user.Role),
+				new Claim(OrganizationClaim, user.OrganizationId.ToHyphens())
 			}),
-			Expires = DateTime.UtcNow.AddMinutes(expiryInMinutes),
+			Expires = DateTime.UtcNow.AddMinutes(_settings.ExpiryInMinutes),
 			SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 		};
 
@@ -40,7 +49,7 @@ public class AccessTokenService : IAccessTokenService
 		return jwtToken;
 	}
 
-	public User DecodeToken(string jwtToken)
+	public User? DecodeToken(string jwtToken)
 	{
 		var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -55,11 +64,11 @@ public class AccessTokenService : IAccessTokenService
 			{
 				switch (claim.Type)
 				{
-					case ClaimTypes.NameIdentifier:
+					case Id:
 						user.Id = Guid.Parse(claim.Value);
 						break;
-					case ClaimTypes.Email:
-						user.EmailAddress = claim.Value;
+					case Role:
+						user.Role = claim.Value;
 						break;
 					case OrganizationClaim:
 						user.OrganizationId = Guid.Parse(claim.Value);
@@ -70,6 +79,6 @@ public class AccessTokenService : IAccessTokenService
 			return user;
 		}
 
-		throw new AppBusinessException($"Invalid token {jwtToken}");
+		return null;
 	}
 }

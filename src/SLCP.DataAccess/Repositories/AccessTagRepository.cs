@@ -6,8 +6,6 @@ namespace SLCP.DataAccess.Repositories;
 
 public class AccessTagRepository : IAccessTagRepository
 {
-	private const string ContainerName = "access-tags";
-
 	private readonly ICosmosService _cosmosService;
 
 	public AccessTagRepository(ICosmosService cosmosService)
@@ -17,7 +15,7 @@ public class AccessTagRepository : IAccessTagRepository
 
 	public async Task<AccessTag> GetByIdAsync(Guid id, Guid? orgId, CancellationToken cancellationToken)
 	{
-		return await _cosmosService.GetItemAsync<AccessTag>(ContainerName, id.ToHyphens(), orgId?.ToHyphens(),
+		return await _cosmosService.GetItemAsync<AccessTag>(ContainerNames.AccessTags, id.ToHyphens(), orgId?.ToHyphens(),
 			cancellationToken);
 	}
 }
