@@ -7,9 +7,6 @@ public class BusinessModule : Module
 {
 	protected override void Load(ContainerBuilder builder)
 	{
-		builder.RegisterAssemblyTypes(typeof(IAccessTokenService).Assembly)
-			.PublicOnly()
-			.AsImplementedInterfaces()
-			.InstancePerDependency();
+		builder.RegisterType<AccessTokenService>().As<IAccessTokenService>().InstancePerDependency();
 	}
 }

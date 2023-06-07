@@ -31,12 +31,13 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 		containerBuilder.RegisterType<CosmosService>().As<ICosmosService>().InstancePerDependency();
 	});
 
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+app.Services.GetService<IDataSeeder>().SeedData(CancellationToken.None);
 
 if (app.Environment.IsDevelopment())
 {

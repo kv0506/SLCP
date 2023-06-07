@@ -6,7 +6,7 @@ namespace SLCP.DataAccess.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private const string ContainerName = "users";
+    public const string ContainerName = "users";
 
     private readonly ICosmosService _cosmosService;
 
@@ -17,14 +17,14 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetByIdAsync(Guid id, Guid? orgId, CancellationToken cancellationToken)
     {
-        return await _cosmosService.GetItemAsync<User>(ContainerName, id.ToString("D"), orgId?.ToString("D"),
+        return await _cosmosService.GetItemAsync<User>(ContainerName, id.ToHyphens(), orgId?.ToHyphens(),
             cancellationToken);
     }
 
     public async Task<User> GetByEmailAsync(string email, Guid? orgId, CancellationToken cancellationToken)
     {
 	    var query = $"SELECT * FROM c WHERE c.emailAddress = {email}";
-		var items = await _cosmosService.GetItemsAsync<User>(ContainerName, query, orgId?.ToString("D"), cancellationToken);
+		var items = await _cosmosService.GetItemsAsync<User>(ContainerName, query, orgId?.ToHyphens(), cancellationToken);
 		return items.SingleOrDefault();
     }
 }

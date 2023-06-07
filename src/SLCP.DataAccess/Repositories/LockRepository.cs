@@ -17,13 +17,13 @@ public class LockRepository : ILockRepository
 
 	public async Task<Lock> GetByIdAsync(Guid id, Guid? orgId, CancellationToken cancellationToken)
 	{
-		return await _cosmosService.GetItemAsync<Lock>(ContainerName, id.ToString("D"), orgId?.ToString("D"),
+		return await _cosmosService.GetItemAsync<Lock>(ContainerName, id.ToHyphens(), orgId?.ToHyphens(),
 			cancellationToken);
 	}
 
 	public async Task<IList<Lock>> GetByOrganizationIdAsync(Guid orgId, CancellationToken cancellationToken)
 	{
 		var query = "SELECT * FROM c";
-		return await _cosmosService.GetItemsAsync<Lock>(ContainerName, query, orgId.ToString("D"), cancellationToken);
+		return await _cosmosService.GetItemsAsync<Lock>(ContainerName, query, orgId.ToHyphens(), cancellationToken);
 	}
 }

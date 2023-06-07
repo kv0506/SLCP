@@ -15,12 +15,14 @@ namespace SLCP.API.Controllers
 		}
 
 		[HttpPost]
+		[Route("ValidateByAccessTag")]
 		public async Task<IActionResult> Validate([FromBody] ValidateLockAccessUsingAccessTagCommand request)
 		{
 			return Ok(Success(await _mediator.Send(request)));
 		}
 
 		[HttpPost]
+		[Route("ValidateByAccessCode")]
 		public async Task<IActionResult> Validate([FromBody] ValidateLockAccessUsingAccessCodeCommand request)
 		{
 			return Ok(Success(await _mediator.Send(request)));

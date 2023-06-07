@@ -20,7 +20,7 @@ public class LockAccessLogRepository : ILockAccessLogRepository
 	public async Task<LockAccessLog> CreateItemAsync(LockAccessLog accessLog, CancellationToken cancellationToken)
 	{
 		return await _cosmosService.CreateItemAsync(ContainerName, accessLog,
-			accessLog.Lock.OrganizationId.ToString("D"), cancellationToken);
+			accessLog.Lock.OrganizationId.ToHyphens(), cancellationToken);
 	}
 
 	public async Task<QueryResult<LockAccessLog>> GetItemsAsync(Guid? lockId, Guid? userId, Guid? orgId, int maxIemCount, string? continuationToken,
@@ -30,14 +30,14 @@ public class LockAccessLogRepository : ILockAccessLogRepository
 
 		if (lockId.IsNotNullOrEmpty())
 		{
-			queryBuilder.Append($"WHERE c.lock.id = {lockId}");
+			queryBuilder.Append($"WHERE c.lock.id = {lockId?.ToHyphens()}");
 		}
 
 		if (userId.IsNotNullOrEmpty())
 		{
-			queryBuilder.Append($" {(lockId.IsNotNullOrEmpty() ? "AND" : "WHERE")} c.user.id = {userId}");
+			queryBuilder.Append($" {(lockId.IsNotNullOrEmpty() ? "AND" : "WHERE")} c.user.id = {userId?.ToHyphens()}");
 		}
 
-		return await _cosmosService.GetItemsAsync<LockAccessLog>(ContainerName, queryBuilder.ToString(), maxIemCount, continuationToken, orgId?.ToString("D"), cancellationToken);
+		return await _cosmosService.GetItemsAsync<LockAccessLog>(ContainerName, queryBuilder.ToString(), maxIemCount, continuationToken, orgId?.ToHyphens(), cancellationToken);
 	}
 }
