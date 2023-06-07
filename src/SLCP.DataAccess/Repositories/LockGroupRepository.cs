@@ -23,7 +23,7 @@ public class LockGroupRepository : ILockGroupRepository
 
     public async Task<IList<LockGroup>> GetByLockIdAsync(Guid lockId, Guid? orgId, CancellationToken cancellationToken)
     {
-        var query = "SELECT * FROM lock-groups lg WHERE ARRAY_CONTAINS(lg.locks, {\"id\": " + lockId.ToString("D") +
+        var query = "SELECT * FROM c WHERE ARRAY_CONTAINS(c.locks, {\"id\": " + lockId.ToString("D") +
                     "})";
         return await _cosmosService.GetItemsAsync<LockGroup>(ContainerName, query, orgId?.ToString("D"), cancellationToken);
     }

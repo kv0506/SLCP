@@ -23,7 +23,7 @@ public class UserRepository : IUserRepository
 
     public async Task<User> GetByEmailAsync(string email, Guid? orgId, CancellationToken cancellationToken)
     {
-	    var query = $"SELECT * FROM user u WHERE u.emailAddress = {email}";
+	    var query = $"SELECT * FROM c WHERE c.emailAddress = {email}";
 		var items = await _cosmosService.GetItemsAsync<User>(ContainerName, query, orgId?.ToString("D"), cancellationToken);
 		return items.SingleOrDefault();
     }

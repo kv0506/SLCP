@@ -23,7 +23,7 @@ public class LockRepository : ILockRepository
 
 	public async Task<IList<Lock>> GetByOrganizationIdAsync(Guid orgId, CancellationToken cancellationToken)
 	{
-		var query = "SELECT * FROM locks";
+		var query = "SELECT * FROM c";
 		return await _cosmosService.GetItemsAsync<Lock>(ContainerName, query, orgId.ToString("D"), cancellationToken);
 	}
 }

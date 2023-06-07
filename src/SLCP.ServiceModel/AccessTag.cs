@@ -10,5 +10,5 @@ public class AccessTag
 
 	public User User { get; set; }
 
-	public Organization Organization { get; set; }
+	public Guid OrganizationId { get; set; }
 }

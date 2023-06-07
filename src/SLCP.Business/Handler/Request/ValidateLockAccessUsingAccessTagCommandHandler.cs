@@ -23,10 +23,10 @@ public class ValidateLockAccessUsingAccessTagCommandHandler : ValidateLockAccess
     {
         var lockObj = await GetLockAsync(request.LockId, cancellationToken);
 
-        var accessTag = await GetAccessTagAsync(request.AccessTagId, lockObj.Organization.Id,
+        var accessTag = await GetAccessTagAsync(request.AccessTagId, lockObj.OrganizationId,
 	        cancellationToken);
 
-        var user = await GetUserAsync(accessTag.User.Id, lockObj.Organization.Id, cancellationToken);
+        var user = await GetUserAsync(accessTag.User.Id, lockObj.OrganizationId, cancellationToken);
 
 		if (accessTag.IsBlocked)
 		{

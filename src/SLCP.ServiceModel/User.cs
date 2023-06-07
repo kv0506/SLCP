@@ -16,5 +16,5 @@ public class User
 
 	public IList<LockGroup> PermittedLockGroups { get; set; }
 
-	public Organization Organization { get; set; }
+	public Guid OrganizationId { get; set; }
 }

@@ -24,7 +24,7 @@ public class CreateLockAccessLogCommandHandler : IRequestHandler<CreateLockAcces
 			AccessState = request.AccessState,
 			AccessDeniedReason = request.AccessDeniedReason,
 			AccessedDateTime = DateTimeOffset.Now,
-			Organization = request.Lock.Organization
+			OrganizationId = request.Lock.OrganizationId
 		};
 
 		await _lockAccessLogRepository.CreateItemAsync(lockAccessLog, cancellationToken);

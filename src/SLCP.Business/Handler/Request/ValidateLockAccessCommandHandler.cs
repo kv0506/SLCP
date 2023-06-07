@@ -27,7 +27,7 @@ public class ValidateLockAccessCommandHandler
 		CancellationToken cancellationToken)
 	{
 		var lockGroups =
-			await LockGroupRepository.GetByLockIdAsync(lockObj.Id, lockObj.Organization.Id, cancellationToken);
+			await LockGroupRepository.GetByLockIdAsync(lockObj.Id, lockObj.OrganizationId, cancellationToken);
 
 		if (lockGroups.Any(x => userObj.PermittedLockGroups.Any(y => y.Id == x.Id)))
 		{

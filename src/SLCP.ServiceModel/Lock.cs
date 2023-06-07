@@ -12,5 +12,5 @@ public class Lock
 
 	public bool IsEnabled { get; set; }
 
-	public Organization Organization { get; set; }
+	public Guid OrganizationId { get; set; }
 }

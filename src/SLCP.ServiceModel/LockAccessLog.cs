@@ -14,7 +14,7 @@ public class LockAccessLog
 
 	public AccessDeniedReason? AccessDeniedReason { get; set; }
 
-	public Organization Organization { get; set; }
+	public Guid OrganizationId { get; set; }
 }
 
 public enum AccessState

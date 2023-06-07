@@ -10,5 +10,5 @@ public class LockGroup
 
 	public IList<Lock> Locks { get; set; }
 
-	public Organization Organization { get; set; }
+	public Guid OrganizationId { get; set; }
 }

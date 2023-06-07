@@ -28,7 +28,7 @@ public class AccessTokenService : IAccessTokenService
 			{
 				new Claim(ClaimTypes.NameIdentifier, user.Id.ToString("D")),
 				new Claim(ClaimTypes.Email, user.EmailAddress),
-				new Claim(OrganizationClaim, user.Organization.Id.ToString("D"))
+				new Claim(OrganizationClaim, user.OrganizationId.ToString("D"))
 			}),
 			Expires = DateTime.UtcNow.AddMinutes(expiryInMinutes),
 			SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -62,10 +62,7 @@ public class AccessTokenService : IAccessTokenService
 						user.EmailAddress = claim.Value;
 						break;
 					case OrganizationClaim:
-						user.Organization = new Organization
-						{
-							Id = Guid.Parse(claim.Value)
-						};
+						user.OrganizationId = Guid.Parse(claim.Value);
 						break;
 				}
 			}
