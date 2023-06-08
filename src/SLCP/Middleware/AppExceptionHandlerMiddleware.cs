@@ -3,8 +3,7 @@ using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using SLCP.API.Model;
 using SLCP.API.Security;
-using SLCP.Business.Exception;
-using SLCP.DataAccess.Exception;
+using SLCP.Core;
 
 namespace SLCP.API.Middleware;
 
@@ -14,7 +13,8 @@ public class AppExceptionHandlerMiddleware
 	private readonly IWebHostEnvironment _environment;
 	private readonly RequestDelegate _next;
 
-	public static string InternalServerErrorMessage { get; set; } = "We're experiencing some difficulties at this time,. Please try again later.";
+	public static string InternalServerErrorMessage { get; set; } =
+		"We're experiencing some difficulties at this time,. Please try again later.";
 
 	public AppExceptionHandlerMiddleware(RequestDelegate next, ILogger<AppExceptionHandlerMiddleware> logger,
 		IWebHostEnvironment environment)
@@ -58,28 +58,32 @@ public class AppExceptionHandlerMiddleware
 			var status = (int)HttpStatusCode.InternalServerError;
 			var response = new ApiResponse
 			{
-				Errors = new List<string>
+				Errors = new List<Error>
 				{
-					_environment.IsDevelopment()
+					new Error(ErrorCode.UnknownError, _environment.IsDevelopment()
 						? exception.SourceException.ToString()
-						: InternalServerErrorMessage
+						: InternalServerErrorMessage)
 				}
 			};
 
 			if (exception.SourceException is FluentValidation.ValidationException fluentValidationEx)
 			{
 				status = 400;
-				response.Errors = fluentValidationEx.Errors.Select(x => x.ErrorMessage).ToList();
+				response.Errors = fluentValidationEx.Errors
+					.Select(x => new Error(x.ErrorCode, x.ErrorMessage)).ToList();
 			}
-			else if (exception.SourceException is AppBusinessException || exception.SourceException is AppDomainException)
+			else if (exception.SourceException is AppException appEx)
 			{
-				status = 400;
-				response.Errors = new List<string>{ exception.SourceException.Message };
+				status = appEx.ErrorCode.ToHttpStatusCode();
+				response.Errors = new List<Error>
+				{
+					new Error(appEx.ErrorCode, appEx.Message)
+				};
 			}
 			else if (exception.SourceException is AuthenticationException authenticationEx)
 			{
-				status = 401;
-				response.Errors = new List<string> { authenticationEx.Message };
+				status = authenticationEx.ErrorCode.ToHttpStatusCode();
+				response.Errors = new List<Error> { new Error(authenticationEx.ErrorCode, authenticationEx.Message) };
 			}
 
 			context.Response.StatusCode = status;

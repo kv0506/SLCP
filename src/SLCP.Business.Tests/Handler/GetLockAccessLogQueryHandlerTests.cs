@@ -4,8 +4,8 @@ using Shouldly;
 using SLCP.Business.Handler.Request;
 using SLCP.Business.Request;
 using SLCP.Business.Services;
+using SLCP.Core;
 using SLCP.DataAccess;
-using SLCP.DataAccess.Exception;
 using SLCP.DataAccess.Repositories.Contracts;
 using SLCP.ServiceModel;
 
@@ -32,7 +32,7 @@ public class GetLockAccessLogQueryHandlerTests
 		_lockAccessLogRepositoryMock
 			.Setup(x => x.GetItemsAsync(It.IsAny<Guid?>(), It.IsAny<Guid?>(), It.IsAny<Guid?>(), It.IsAny<int>(),
 				It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-			.ThrowsAsync(new AppDomainException(string.Empty));
+			.ThrowsAsync(new AppException(ErrorCode.NotFound, string.Empty));
 
 		_requestContextMock.SetupGet(x => x.OrganizationId).Returns(Guid.Empty);
 
@@ -41,7 +41,7 @@ public class GetLockAccessLogQueryHandlerTests
 			LockId = Guid.NewGuid()
 		};
 
-		await Should.ThrowAsync<AppDomainException>(() => _handler.Handle(query, CancellationToken.None));
+		await Should.ThrowAsync<AppException>(() => _handler.Handle(query, CancellationToken.None));
 
 		_lockAccessLogRepositoryMock.Verify(
 			x => x.GetItemsAsync(query.LockId, query.UserId, Guid.Empty, query.PageSize, query.ContinuationToken,

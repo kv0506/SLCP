@@ -1,8 +1,8 @@
 ﻿using MediatR;
-using SLCP.Business.Exception;
 using SLCP.Business.Notification;
 using SLCP.Business.Response;
 using SLCP.Business.Services;
+using SLCP.Core;
 using SLCP.DataAccess.Repositories.Contracts;
 using SLCP.ServiceModel;
 
@@ -42,7 +42,7 @@ public class ValidateLockAccessCommandHandler
 		var lockObj = await LockRepository.GetByIdAsync(lockId, RequestContext.OrganizationId, cancellationToken);
 		if (lockObj == null)
 		{
-			throw new AppBusinessException($"Lock [Id={lockId}] does not exist");
+			throw new AppException(ErrorCode.NotFound, $"Lock [Id={lockId}] does not exist");
 		}
 
 		return lockObj;

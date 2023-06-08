@@ -5,9 +5,9 @@ using SLCP.Business.Handler.Request;
 using SLCP.Business.Request;
 using SLCP.Business.Response;
 using SLCP.Business.Services;
-using SLCP.DataAccess.Exception;
 using SLCP.DataAccess.Repositories.Contracts;
 using SLCP.Business.Notification;
+using SLCP.Core;
 using SLCP.ServiceModel;
 
 namespace SLCP.Business.Tests.Handler;
@@ -42,7 +42,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 	{
 		_lockRepositoryMock
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-			.ThrowsAsync(new AppDomainException(string.Empty));
+			.ThrowsAsync(new AppException(ErrorCode.NotFound, string.Empty));
 
 		_userRepositoryMock
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
@@ -55,7 +55,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 			UserLockAccessCode = "123456"
 		};
 
-		await Should.ThrowAsync<AppDomainException>(() => _handler.Handle(command, CancellationToken.None));
+		await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
 
 		_lockRepositoryMock.Verify(x=>x.GetByIdAsync(command.LockId,_orgId, It.IsAny<CancellationToken>()), Times.Once);
 		_userRepositoryMock.Verify(x=>x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()),Times.Never);

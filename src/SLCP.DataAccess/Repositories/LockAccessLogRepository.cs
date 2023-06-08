@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using CSharpExtensions;
+using SLCP.Core;
 using SLCP.DataAccess.CosmosService;
 using SLCP.DataAccess.Repositories.Contracts;
 using SLCP.ServiceModel;

@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SLCP.Core\SLCP.Core.csproj" />
     <ProjectReference Include="..\SLCP.ServiceModel\SLCP.ServiceModel.csproj" />
   </ItemGroup>
 
@@ -29,10 +30,6 @@
     <Reference Include="Microsoft.AspNetCore.Mvc.Core">
       <HintPath>C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\6.0.13\ref\net6.0\Microsoft.AspNetCore.Mvc.Core.dll</HintPath>
     </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Exception\" />
   </ItemGroup>
 
 </Project>

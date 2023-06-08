@@ -1,8 +1,8 @@
 ﻿using MediatR;
-using SLCP.Business.Exception;
 using SLCP.Business.Request;
 using SLCP.Business.Response;
 using SLCP.Business.Services;
+using SLCP.Core;
 using SLCP.DataAccess.Repositories.Contracts;
 
 namespace SLCP.Business.Handler.Request;
@@ -23,7 +23,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 		var user = await _userRepository.GetByEmailAsync(request.Email, null, cancellationToken);
 		if (user == null)
 		{
-			throw new AppBusinessException("Invalid email address or password");
+			throw new AppException(ErrorCode.InvalidUsernameOrPassword, "Invalid email address or password");
 		}
 
 		if (HashService.VerifyHash(request.Password, user.PasswordSalt, user.PasswordHash))
@@ -35,6 +35,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 			};
 		}
 
-		throw new AppBusinessException("Invalid email address or password");
+		throw new AppException(ErrorCode.InvalidUsernameOrPassword, "Invalid email address or password");
 	}
 }

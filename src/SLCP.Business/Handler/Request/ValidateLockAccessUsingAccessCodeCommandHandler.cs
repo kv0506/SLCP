@@ -1,9 +1,9 @@
 ﻿using CSharpExtensions;
 using MediatR;
-using SLCP.Business.Exception;
 using SLCP.Business.Request;
 using SLCP.Business.Response;
 using SLCP.Business.Services;
+using SLCP.Core;
 using SLCP.DataAccess.Repositories.Contracts;
 using SLCP.ServiceModel;
 
@@ -42,7 +42,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandler : ValidateLockAcces
 		var user = await _userRepository.GetByIdAsync(userId, RequestContext.OrganizationId, cancellationToken);
 		if (user == null)
 		{
-			throw new AppBusinessException($"User [Id={userId}] does not exist");
+			throw new AppException(ErrorCode.NotFound, $"User [Id={userId}] does not exist");
 		}
 
 		return user;

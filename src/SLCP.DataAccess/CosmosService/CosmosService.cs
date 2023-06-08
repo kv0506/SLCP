@@ -1,6 +1,6 @@
 ﻿using CSharpExtensions;
 using Microsoft.Azure.Cosmos;
-using SLCP.DataAccess.Exception;
+using SLCP.Core;
 
 namespace SLCP.DataAccess.CosmosService;
 
@@ -31,7 +31,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppDomainException("Container creation failed", ex);
+			throw new AppException(ErrorCode.DatabaseError, "Container creation failed", ex);
 		}
 	}
 
@@ -43,7 +43,7 @@ public class CosmosService : ICosmosService
 			var container = GetContainer(containerName);
 			if (container == null)
 			{
-				throw new AppDomainException($"Container does not exist {containerName}");
+				throw new AppException(ErrorCode.DatabaseError, $"Container does not exist {containerName}");
 			}
 
 			var response = await container.CreateItemAsync(item: item, partitionKey: GetPartitionKey(partitionKey),
@@ -53,7 +53,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppDomainException($"Item creation failed in container [{containerName}]", ex);
+			throw new AppException(ErrorCode.DatabaseError, $"Item creation failed in container [{containerName}]", ex);
 		}
 	}
 
@@ -65,7 +65,7 @@ public class CosmosService : ICosmosService
 			var container = GetContainer(containerName);
 			if (container == null)
 			{
-				throw new AppDomainException($"Container does not exist {containerName}");
+				throw new AppException(ErrorCode.DatabaseError, $"Container does not exist {containerName}");
 			}
 
 			return await container.ReadItemAsync<T>(id: itemId, partitionKey: GetPartitionKey(partitionKey),
@@ -73,7 +73,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppDomainException($"Unable to get the item [Id={itemId}] from the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.NotFound, $"Unable to get the item [Id={itemId}] from the container [{containerName}]", ex);
 		}
 	}
 
@@ -84,7 +84,7 @@ public class CosmosService : ICosmosService
 			var container = GetContainer(containerName);
 			if (container == null)
 			{
-				throw new AppDomainException($"Container does not exist {containerName}");
+				throw new AppException(ErrorCode.DatabaseError, $"Container does not exist {containerName}");
 			}
 
 			var response = container.GetItemQueryIterator<T>(query);
@@ -96,7 +96,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppDomainException($"Unable to get the item from the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.NotFound, $"Unable to get the item from the container [{containerName}]", ex);
 		}
 
 		return default;
@@ -110,7 +110,7 @@ public class CosmosService : ICosmosService
 			var container = GetContainer(containerName);
 			if (container == null)
 			{
-				throw new AppDomainException($"Container does not exist {containerName}");
+				throw new AppException(ErrorCode.DatabaseError, $"Container does not exist {containerName}");
 			}
 
 			var queryDefinition = new QueryDefinition(
@@ -136,7 +136,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppDomainException($"Unable to get the items from the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.NotFound, $"Unable to get the items from the container [{containerName}]", ex);
 		}
 	}
 
@@ -149,7 +149,7 @@ public class CosmosService : ICosmosService
 			var container = GetContainer(containerName);
 			if (container == null)
 			{
-				throw new AppDomainException($"Container does not exist {containerName}");
+				throw new AppException(ErrorCode.DatabaseError, $"Container does not exist {containerName}");
 			}
 
 			var queryDefinition = new QueryDefinition(
@@ -175,7 +175,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppDomainException($"Unable to get the items from the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.NotFound, $"Unable to get the items from the container [{containerName}]", ex);
 		}
 	}
 
@@ -187,7 +187,7 @@ public class CosmosService : ICosmosService
 			var container = GetContainer(containerName);
 			if (container == null)
 			{
-				throw new AppDomainException($"Container does not exist {containerName}");
+				throw new AppException(ErrorCode.DatabaseError, $"Container does not exist {containerName}");
 			}
 
 			return (await container.UpsertItemAsync(item: item, partitionKey: GetPartitionKey(partitionKey),
@@ -195,7 +195,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppDomainException($"Unable to create or insert the item in the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.DatabaseError, $"Unable to create or insert the item in the container [{containerName}]", ex);
 		}
 	}
 

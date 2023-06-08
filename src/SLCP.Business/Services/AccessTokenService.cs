@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using SLCP.DataAccess;
+using SLCP.Core;
 using SLCP.ServiceModel;
 
 namespace SLCP.Business.Services;

@@ -1,4 +1,4 @@
-﻿namespace SLCP.DataAccess;
+﻿namespace SLCP.Core;
 
 public static class GuidExtensions
 {

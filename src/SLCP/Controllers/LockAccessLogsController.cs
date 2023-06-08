@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SLCP.API.Security.Attributes;
 using SLCP.Business.Request;
+using SLCP.Core;
 
 namespace SLCP.API.Controllers
 {
@@ -16,7 +17,7 @@ namespace SLCP.API.Controllers
 		}
 
 		[HttpGet]
-		[AuthorizedRoles("SecurityAdmin")]
+		[AuthorizedRoles(Roles.SecurityAdmin)]
 		public async Task<IActionResult> Get([FromQuery] GetLockAccessLogQuery request)
 		{
 			return Ok(Success(await _mediator.Send(request)));

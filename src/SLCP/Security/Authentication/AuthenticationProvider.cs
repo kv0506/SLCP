@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 using CSharpExtensions;
 using SLCP.Business.Services;
-using SLCP.DataAccess.Exception;
+using SLCP.Core;
 using SLCP.DataAccess.Repositories.Contracts;
 
 namespace SLCP.API.Security.Authentication;
@@ -79,7 +79,7 @@ public class AuthenticationProvider : IAuthenticationProvider
 				_requestContext.ApiKeyId = apiKey.Id;
 				_requestContext.OrganizationId = apiKey.OrganizationId;
 			}
-			catch (AppDomainException e)
+			catch (AppException e)
 			{
 				_logger.LogError(e.Message, e);
 				throw AuthenticationFailed("ApiKey is not valid");
@@ -89,6 +89,6 @@ public class AuthenticationProvider : IAuthenticationProvider
 
 	private AuthenticationException AuthenticationFailed(string errorMessage)
 	{
-		return new AuthenticationException(errorMessage);
+		return new AuthenticationException(ErrorCode.Unauthorized, errorMessage);
 	}
 }

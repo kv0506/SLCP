@@ -1,8 +1,8 @@
 ﻿using MediatR;
-using SLCP.Business.Exception;
 using SLCP.Business.Request;
 using SLCP.Business.Response;
 using SLCP.Business.Services;
+using SLCP.Core;
 using SLCP.DataAccess.Repositories.Contracts;
 using SLCP.ServiceModel;
 
@@ -43,7 +43,7 @@ public class ValidateLockAccessUsingAccessTagCommandHandler : ValidateLockAccess
 
 		if (accessTag == null)
 		{
-			throw new AppBusinessException($"AccessTag [Id={accessTagId}] does not exist");
+			throw new AppException(ErrorCode.NotFound, $"AccessTag [Id={accessTagId}] does not exist");
 		}
 
 		return accessTag;

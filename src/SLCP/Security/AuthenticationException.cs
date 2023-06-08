@@ -1,8 +1,10 @@
-﻿namespace SLCP.API.Security;
+﻿using SLCP.Core;
 
-public class AuthenticationException : System.Exception
+namespace SLCP.API.Security;
+
+public class AuthenticationException : AppException
 {
-	public AuthenticationException(string message) : base(message)
+	public AuthenticationException(ErrorCode errorCode, string message) : base(errorCode, message)
 	{
 	}
 }
