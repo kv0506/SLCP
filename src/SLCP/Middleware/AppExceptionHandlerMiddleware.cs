@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Runtime.ExceptionServices;
-using System.Security.Authentication;
 using System.Text.Json;
 using SLCP.API.Model;
+using SLCP.API.Security;
 using SLCP.Business.Exception;
 using SLCP.DataAccess.Exception;
 
