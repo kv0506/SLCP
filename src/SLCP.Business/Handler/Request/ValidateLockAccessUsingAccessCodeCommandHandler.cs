@@ -25,7 +25,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandler : ValidateLockAcces
 		CancellationToken cancellationToken)
 	{
 		var lockObj = await GetLockAsync(request.LockId, cancellationToken);
-		var user = await GetUserAsync(request.UserId, cancellationToken);
+		var user = await GetUserAsync(RequestContext.UserId.GetValueOrDefault(), cancellationToken);
 
 		if (request.UserLockAccessCode.IsNotEquals(user.LockAccessCode))
 		{

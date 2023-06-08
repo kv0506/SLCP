@@ -141,8 +141,7 @@ public class CosmosService : ICosmosService
 	}
 
 	public async Task<QueryResult<T>> GetItemsAsync<T>(string containerName, string query, int pageSize,
-		string? continuationToken,
-		string? partitionKey, CancellationToken cancellationToken)
+		string? continuationToken, string? partitionKey, CancellationToken cancellationToken)
 	{
 		try
 		{
@@ -162,14 +161,14 @@ public class CosmosService : ICosmosService
 					MaxItemCount = pageSize,
 					PartitionKey = GetPartitionKey(partitionKey)
 				},
-				continuationToken: continuationToken
+				continuationToken: continuationToken.IsNotNullOrEmpty() ? continuationToken.FromBase64() : null
 			);
 
 			var queryResult = new QueryResult<T>();
 
 			var response = await queryResultSetIterator.ReadNextAsync(cancellationToken);
 			queryResult.Records = response.ToList();
-			queryResult.ContinuationToken = response.ContinuationToken;
+			queryResult.ContinuationToken = response.ContinuationToken.IsNotNullOrEmpty() ? response.ContinuationToken.ToBase64() : null;
 
 			return queryResult;
 		}

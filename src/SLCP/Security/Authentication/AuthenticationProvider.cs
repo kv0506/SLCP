@@ -4,6 +4,7 @@ using CSharpExtensions;
 using SLCP.Business.Services;
 using SLCP.Core;
 using SLCP.DataAccess.Repositories.Contracts;
+using SLCP.ServiceModel;
 
 namespace SLCP.API.Security.Authentication;
 
@@ -72,17 +73,25 @@ public class AuthenticationProvider : IAuthenticationProvider
 		}
 		else
 		{
+			ApiKey apiKey = null;
+
 			try
 			{
-				var apiKey = await _apiKeyRepository.GetByKeyAsync(authHeaderValue, cancellationToken);
-
-				_requestContext.ApiKeyId = apiKey.Id;
-				_requestContext.OrganizationId = apiKey.OrganizationId;
+				apiKey = await _apiKeyRepository.GetByKeyAsync(authHeaderValue, cancellationToken);
 			}
 			catch (AppException e)
 			{
 				_logger.LogError(e.Message, e);
-				throw AuthenticationFailed("ApiKey is not valid");
+			}
+
+			if (apiKey != null)
+			{
+				_requestContext.ApiKeyId = apiKey.Id;
+				_requestContext.OrganizationId = apiKey.OrganizationId;
+			}
+			else
+			{
+				throw AuthenticationFailed("Invalid ApiKey");
 			}
 		}
 	}

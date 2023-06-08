@@ -22,6 +22,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 	private Mock<IRequestContext> _requestContextMock;
 
 	private readonly Guid _orgId = Guid.NewGuid();
+	private readonly Guid _userId = Guid.NewGuid();
 
 	[SetUp]
 	public void Setup()
@@ -35,6 +36,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 			_lockRepositoryMock.Object, _mediatorMock.Object, _requestContextMock.Object);
 
 		_requestContextMock.SetupGet(x => x.OrganizationId).Returns(_orgId);
+		_requestContextMock.SetupGet(x => x.UserId).Returns(_userId);
 	}
 
 	[Test]
@@ -51,7 +53,6 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 		var command = new ValidateLockAccessUsingAccessCodeCommand
 		{
 			LockId = Guid.NewGuid(),
-			UserId = Guid.NewGuid(),
 			UserLockAccessCode = "123456"
 		};
 
@@ -76,7 +77,6 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 		var command = new ValidateLockAccessUsingAccessCodeCommand
 		{
 			LockId = Guid.NewGuid(),
-			UserId = Guid.NewGuid(),
 			UserLockAccessCode = "123456"
 		};
 
@@ -84,7 +84,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 		exception.ErrorCode.ShouldBe(ErrorCode.InvalidAccessCode);
 
 		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
-		_userRepositoryMock.Verify(x => x.GetByIdAsync(command.UserId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
+		_userRepositoryMock.Verify(x => x.GetByIdAsync(_userId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 
 		_mediatorMock.Verify(x => x.Publish(
 				It.Is<LockAccessedEvent>(lockAccessedEvent => lockAccessedEvent.AccessState == AccessState.Denied &&
@@ -126,7 +126,6 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 		var command = new ValidateLockAccessUsingAccessCodeCommand
 		{
 			LockId = Guid.NewGuid(),
-			UserId = Guid.NewGuid(),
 			UserLockAccessCode = "123456"
 		};
 
@@ -134,7 +133,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 		exception.ErrorCode.ShouldBe(ErrorCode.DoesNotHaveAccessToLock);
 
 		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
-		_userRepositoryMock.Verify(x => x.GetByIdAsync(command.UserId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
+		_userRepositoryMock.Verify(x => x.GetByIdAsync(_userId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 
 		_mediatorMock.Verify(x => x.Publish(
 			It.Is<LockAccessedEvent>(lockAccessedEvent => lockAccessedEvent.AccessState == AccessState.Denied &&
@@ -179,7 +178,6 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 		var command = new ValidateLockAccessUsingAccessCodeCommand
 		{
 			LockId = Guid.NewGuid(),
-			UserId = Guid.NewGuid(),
 			UserLockAccessCode = "123456"
 		};
 
@@ -187,7 +185,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 		response.AccessAllowed.ShouldBeTrue();
 
 		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
-		_userRepositoryMock.Verify(x => x.GetByIdAsync(command.UserId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
+		_userRepositoryMock.Verify(x => x.GetByIdAsync(_userId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 
 		_mediatorMock.Verify(x => x.Publish(
 			It.Is<LockAccessedEvent>(lockAccessedEvent => lockAccessedEvent.AccessState == AccessState.Allowed),

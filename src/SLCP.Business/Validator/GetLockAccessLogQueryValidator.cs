@@ -8,7 +8,7 @@ public class GetLockAccessLogQueryValidator : AbstractValidator<GetLockAccessLog
 {
 	public GetLockAccessLogQueryValidator()
 	{
-		RuleFor(x => x.LockId).NotNull().NotEmpty().When(x => x.UserId.IsNullOrEmpty());
-		RuleFor(x => x.UserId).NotNull().NotEmpty().When(x => x.LockId.IsNullOrEmpty());
+		RuleFor(x => x.LockId).NotEmpty().When(x => x.UserId.IsNullOrEmpty());
+		RuleFor(x => x.UserId).NotEmpty().When(x => x.LockId.IsNullOrEmpty());
 	}
 }

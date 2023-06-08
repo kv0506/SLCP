@@ -7,7 +7,5 @@ public class ValidateLockAccessUsingAccessCodeCommand : IRequest<LockAccessRespo
 {
 	public Guid LockId { get; set; }
 
-	public Guid UserId { get; set; }
-
 	public string? UserLockAccessCode { get; set; }
 }

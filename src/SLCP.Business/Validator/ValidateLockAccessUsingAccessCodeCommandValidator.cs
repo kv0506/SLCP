@@ -9,8 +9,6 @@ public class ValidateLockAccessUsingAccessCodeCommandValidator : AbstractValidat
 	{
 		RuleFor(x => x.LockId).NotEmpty();
 
-		RuleFor(x => x.UserId).NotEmpty();
-
 		RuleFor(x => x.UserLockAccessCode).NotEmpty();
 	}
 }

@@ -20,7 +20,14 @@ public class CreateLockAccessLogCommandHandler : IRequestHandler<CreateLockAcces
 		{
 			Id = Guid.NewGuid(),
 			Lock = request.Lock,
-			User = request.User,
+			User = new User
+			{
+				Id = request.User.Id,
+				Name = request.User.Name,
+				EmailAddress = request.User.EmailAddress,
+				Role = request.User.Role,
+				OrganizationId = request.User.OrganizationId,
+			},
 			AccessState = request.AccessState,
 			AccessDeniedReason = request.AccessDeniedReason,
 			AccessedDateTime = DateTimeOffset.Now,

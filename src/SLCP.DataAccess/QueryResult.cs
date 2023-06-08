@@ -4,5 +4,5 @@ public class QueryResult<T>
 {
     public IList<T> Records { get; set; }
 
-    public string ContinuationToken { get; set; }
+    public string? ContinuationToken { get; set; }
 }
