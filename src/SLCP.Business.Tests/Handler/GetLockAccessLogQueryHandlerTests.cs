@@ -41,7 +41,8 @@ public class GetLockAccessLogQueryHandlerTests
 			LockId = Guid.NewGuid()
 		};
 
-		await Should.ThrowAsync<AppException>(() => _handler.Handle(query, CancellationToken.None));
+		var exception = await Should.ThrowAsync<AppException>(() => _handler.Handle(query, CancellationToken.None));
+		exception.ErrorCode.ShouldBe(ErrorCode.NotFound);
 
 		_lockAccessLogRepositoryMock.Verify(
 			x => x.GetItemsAsync(query.LockId, query.UserId, Guid.Empty, query.PageSize, query.ContinuationToken,

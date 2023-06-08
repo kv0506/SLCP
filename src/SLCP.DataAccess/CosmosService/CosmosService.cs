@@ -53,7 +53,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppException(ErrorCode.DatabaseError, $"Item creation failed in container [{containerName}]", ex);
+			throw new AppException(ErrorCode.DatabaseError, "Resource creation failed", ex);
 		}
 	}
 
@@ -73,7 +73,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppException(ErrorCode.NotFound, $"Unable to get the item [Id={itemId}] from the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.NotFound, $"Resource [Id={itemId}] not found", ex);
 		}
 	}
 
@@ -96,7 +96,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppException(ErrorCode.NotFound, $"Unable to get the item from the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.NotFound, "Resource not found", ex);
 		}
 
 		return default;
@@ -136,7 +136,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppException(ErrorCode.NotFound, $"Unable to get the items from the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.NotFound, "Resources not found", ex);
 		}
 	}
 
@@ -175,7 +175,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppException(ErrorCode.NotFound, $"Unable to get the items from the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.NotFound, "Resources not found", ex);
 		}
 	}
 
@@ -195,7 +195,7 @@ public class CosmosService : ICosmosService
 		}
 		catch (CosmosException ex)
 		{
-			throw new AppException(ErrorCode.DatabaseError, $"Unable to create or insert the item in the container [{containerName}]", ex);
+			throw new AppException(ErrorCode.DatabaseError, "Resource insertion failed", ex);
 		}
 	}
 

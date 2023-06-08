@@ -9,6 +9,8 @@ public static class ErrorCodeExtensions
 			case ErrorCode.NotFound:
 				return 404;
 			case ErrorCode.Unauthorized:
+			case ErrorCode.AccessTokenExpired:
+			case ErrorCode.DoesNotHaveAccessToLock:
 				return 401;
 		}
 

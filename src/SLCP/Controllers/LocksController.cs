@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SLCP.API.Security.Attributes;
 using SLCP.Business.Request;
+using SLCP.Core;
 
 namespace SLCP.API.Controllers
 {
@@ -24,7 +25,7 @@ namespace SLCP.API.Controllers
 		}
 
 		[HttpPost]
-		[AuthorizedRoles("Employee")]
+		[AuthorizedRoles(Roles.Employee, Roles.SecurityAdmin)]
 		[Route("ValidateByAccessCode")]
 		public async Task<IActionResult> Validate([FromBody] ValidateLockAccessUsingAccessCodeCommand request)
 		{

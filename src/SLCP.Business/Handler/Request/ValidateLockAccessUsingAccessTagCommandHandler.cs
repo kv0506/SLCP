@@ -13,7 +13,8 @@ public class ValidateLockAccessUsingAccessTagCommandHandler : ValidateLockAccess
 {
 	private readonly IAccessTagRepository _accessTagRepository;
 
-	public ValidateLockAccessUsingAccessTagCommandHandler(ILockRepository lockRepository, IAccessTagRepository accessTagRepository, 
+	public ValidateLockAccessUsingAccessTagCommandHandler(ILockRepository lockRepository,
+		IAccessTagRepository accessTagRepository,
 		IMediator mediator, IRequestContext requestContext) : base(lockRepository, mediator, requestContext)
 	{
 		_accessTagRepository = accessTagRepository;
@@ -31,7 +32,7 @@ public class ValidateLockAccessUsingAccessTagCommandHandler : ValidateLockAccess
 		{
 			await PublishLockAccessEvent(lockObj, accessTag.User, AccessState.Denied,
 				AccessDeniedReason.AccessTagBlocked, cancellationToken);
-			return AccessDenied($"AccessTag [Id={request.AccessTagId}] is blocked");
+			return AccessDenied(ErrorCode.AccessTagIsBlocked, $"AccessTag [Id={request.AccessTagId}] is blocked");
 		}
 
 		return await DoesUserHaveAccessForLockAsync(lockObj, accessTag.User, cancellationToken);

@@ -57,6 +57,10 @@ public class AccessTokenService : IAccessTokenService
 		{
 			var jwtSecurityToken = tokenHandler.ReadJwtToken(jwtToken);
 
+			if (jwtSecurityToken.ValidTo < DateTime.UtcNow)
+				throw new AppException(ErrorCode.AccessTokenExpired,
+					"Access token is expired. Please request for a new token");
+
 			var claims = jwtSecurityToken.Claims;
 			var user = new User();
 

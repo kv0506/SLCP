@@ -14,7 +14,8 @@ public class ValidateLockAccessCommandHandler
 	protected readonly IRequestContext RequestContext;
 	protected readonly ILockRepository LockRepository;
 
-	public ValidateLockAccessCommandHandler(ILockRepository lockRepository, IMediator mediator, IRequestContext requestContext)
+	public ValidateLockAccessCommandHandler(ILockRepository lockRepository, IMediator mediator,
+		IRequestContext requestContext)
 	{
 		LockRepository = lockRepository;
 		RequestContext = requestContext;
@@ -34,7 +35,7 @@ public class ValidateLockAccessCommandHandler
 		await PublishLockAccessEvent(lockObj, userObj, AccessState.Denied,
 			AccessDeniedReason.DoesNotHaveAccessToLock, cancellationToken);
 
-		return AccessDenied("User does not have access to the lock");
+		return AccessDenied(ErrorCode.DoesNotHaveAccessToLock, "User does not have access to the lock");
 	}
 
 	protected async Task<Lock> GetLockAsync(Guid lockId, CancellationToken cancellationToken)
@@ -60,9 +61,9 @@ public class ValidateLockAccessCommandHandler
 		await Mediator.Publish(new OpenLockEvent(lockObj), cancellationToken);
 	}
 
-	protected LockAccessResponse AccessDenied(string message)
+	protected LockAccessResponse AccessDenied(ErrorCode errorCode, string message)
 	{
-		return new LockAccessResponse { AccessAllowed = false, Message = message };
+		throw new AppException(errorCode, message);
 	}
 
 	protected LockAccessResponse AccessAllowed() => new LockAccessResponse { AccessAllowed = true };

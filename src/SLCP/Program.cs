@@ -48,11 +48,8 @@ app.UseAppExceptionHandler();
 // used for setting up data for testing
 //app.Services.GetService<IDataSeeder>().SeedData(CancellationToken.None);
 
-if (app.Environment.IsDevelopment())
-{
-	app.UseSwagger();
-	app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

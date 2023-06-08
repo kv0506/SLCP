@@ -87,7 +87,8 @@ public class AppExceptionHandlerMiddleware
 			}
 
 			context.Response.StatusCode = status;
-			await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+			await context.Response.WriteAsync(JsonSerializer.Serialize(response,
+				new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }));
 			await context.Response.Body.FlushAsync();
 		}
 		catch (Exception ex)

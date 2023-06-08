@@ -55,14 +55,15 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 			UserLockAccessCode = "123456"
 		};
 
-		await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
+		var exception = await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
+		exception.ErrorCode.ShouldBe(ErrorCode.NotFound);
 
 		_lockRepositoryMock.Verify(x=>x.GetByIdAsync(command.LockId,_orgId, It.IsAny<CancellationToken>()), Times.Once);
 		_userRepositoryMock.Verify(x=>x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()),Times.Never);
 	}
 
 	[Test]
-	public async Task Handle_ValidateLockAccessUsingAccessCodeCommand_Returns_AccessDenied_When_UserAccessCodeIsWrong()
+	public async Task Handle_ValidateLockAccessUsingAccessCodeCommand_ThrowsException_When_UserAccessCodeIsWrong()
 	{
 		_lockRepositoryMock
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
@@ -79,8 +80,8 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 			UserLockAccessCode = "123456"
 		};
 
-		var response = await _handler.Handle(command, CancellationToken.None);
-		response.AccessAllowed.ShouldBeFalse();
+		var exception = await Should.ThrowAsync<AppException>(()=> _handler.Handle(command, CancellationToken.None));
+		exception.ErrorCode.ShouldBe(ErrorCode.InvalidAccessCode);
 
 		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 		_userRepositoryMock.Verify(x => x.GetByIdAsync(command.UserId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
@@ -129,8 +130,8 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 			UserLockAccessCode = "123456"
 		};
 
-		var response = await _handler.Handle(command, CancellationToken.None);
-		response.AccessAllowed.ShouldBeFalse();
+		var exception = await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
+		exception.ErrorCode.ShouldBe(ErrorCode.DoesNotHaveAccessToLock);
 
 		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 		_userRepositoryMock.Verify(x => x.GetByIdAsync(command.UserId, _orgId, It.IsAny<CancellationToken>()), Times.Once);

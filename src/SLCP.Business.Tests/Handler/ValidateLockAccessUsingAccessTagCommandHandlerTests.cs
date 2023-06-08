@@ -54,7 +54,8 @@ public class ValidateLockAccessUsingAccessTagCommandHandlerTests
 			AccessTagId = Guid.NewGuid()
 		};
 
-		await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
+		var exception = await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
+		exception.ErrorCode.ShouldBe(ErrorCode.NotFound);
 
 		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 		_accessTagRepositoryMock.Verify(x => x.GetByIdAsync(command.AccessTagId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
@@ -77,8 +78,8 @@ public class ValidateLockAccessUsingAccessTagCommandHandlerTests
 			AccessTagId = Guid.NewGuid()
 		};
 
-		var response = await _handler.Handle(command, CancellationToken.None);
-		response.AccessAllowed.ShouldBeFalse();
+		var exception = await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
+		exception.ErrorCode.ShouldBe(ErrorCode.AccessTagIsBlocked);
 
 		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 		_accessTagRepositoryMock.Verify(x => x.GetByIdAsync(command.AccessTagId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
@@ -126,8 +127,8 @@ public class ValidateLockAccessUsingAccessTagCommandHandlerTests
 			AccessTagId = Guid.NewGuid()
 		};
 
-		var response = await _handler.Handle(command, CancellationToken.None);
-		response.AccessAllowed.ShouldBeFalse();
+		var exception = await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
+		exception.ErrorCode.ShouldBe(ErrorCode.DoesNotHaveAccessToLock);
 
 		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 		_accessTagRepositoryMock.Verify(x => x.GetByIdAsync(command.AccessTagId, _orgId, It.IsAny<CancellationToken>()), Times.Once);

@@ -5,7 +5,11 @@
 		UnknownError,
 		DatabaseError,
 		Unauthorized,
+		NotFound,
+		AccessTokenExpired,
 		InvalidUsernameOrPassword,
-		NotFound
+		InvalidAccessCode,
+		AccessTagIsBlocked,
+		DoesNotHaveAccessToLock
 	}
 }
