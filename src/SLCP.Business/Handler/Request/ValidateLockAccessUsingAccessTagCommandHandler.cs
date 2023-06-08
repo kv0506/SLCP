@@ -14,8 +14,10 @@ public class ValidateLockAccessUsingAccessTagCommandHandler : ValidateLockAccess
 	private readonly IAccessTagRepository _accessTagRepository;
 
 	public ValidateLockAccessUsingAccessTagCommandHandler(IUserRepository userRepository,
-		ILockRepository lockRepository, ILockGroupRepository lockGroupRepository, IAccessTagRepository accessTagRepository, IMediator mediator,
-		IRequestContext requestContext) : base(userRepository, lockRepository, lockGroupRepository, mediator, requestContext)
+		ILockRepository lockRepository, ILockGroupRepository lockGroupRepository,
+		IAccessTagRepository accessTagRepository, IMediator mediator,
+		IRequestContext requestContext) : base(userRepository, lockRepository, lockGroupRepository, mediator,
+		requestContext)
 	{
 		_accessTagRepository = accessTagRepository;
 	}
@@ -37,17 +39,7 @@ public class ValidateLockAccessUsingAccessTagCommandHandler : ValidateLockAccess
 			return AccessDenied($"AccessTag [Id={request.AccessTagId}] is blocked");
 		}
 
-		if (await DoesUserHaveAccessForLockAsync(lockObj.Id, user, cancellationToken))
-		{
-			await PublishLockAccessEvent(lockObj, user, AccessState.Allowed, null, cancellationToken);
-			return AccessAllowed();
-		}
-		else
-		{
-			await PublishLockAccessEvent(lockObj, user, AccessState.Denied,
-				AccessDeniedReason.DoesNotHaveAccessToLock, cancellationToken);
-			return AccessDenied("User does not have access to the lock");
-		}
+		return await DoesUserHaveAccessForLockAsync(lockObj, user, cancellationToken);
 	}
 
 	private async Task<AccessTag> GetAccessTagAsync(Guid accessTagId, Guid orgId, CancellationToken cancellationToken)

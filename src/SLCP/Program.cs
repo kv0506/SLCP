@@ -1,13 +1,13 @@
+using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using MediatR.Extensions.Autofac.DependencyInjection;
-using MediatR.Extensions.Autofac.DependencyInjection.Builder;
+using MediatR.Extensions.FluentValidation.AspNetCore;
 using SLCP.API;
 using SLCP.API.Middleware;
 using SLCP.API.Security.Attributes;
 using SLCP.Business;
-using SLCP.Business.Request;
 using SLCP.Business.Services;
+using SLCP.Business.Validator;
 using SLCP.DataAccess;
 using SLCP.DataAccess.CosmosService;
 
@@ -16,14 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 	.ConfigureContainer<ContainerBuilder>(containerBuilder =>
 	{
-		var configuration = MediatRConfigurationBuilder
-			.Create(typeof(LoginCommand).Assembly)
-			.WithAllOpenGenericHandlerTypesRegistered()
-			.WithRegistrationScope(RegistrationScope.Scoped)
-			.Build();
-
-		containerBuilder.RegisterMediatR(configuration);
-
 		containerBuilder.RegisterModule(new ApiModule());
 		containerBuilder.RegisterModule(new DataAccessModule());
 		containerBuilder.RegisterModule(new BusinessModule());
@@ -46,6 +38,8 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddFluentValidation(new[] { typeof(LoginCommandValidator).GetTypeInfo().Assembly });
 
 var app = builder.Build();
 

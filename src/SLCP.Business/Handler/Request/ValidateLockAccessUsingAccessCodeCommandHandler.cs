@@ -31,16 +31,6 @@ public class ValidateLockAccessUsingAccessCodeCommandHandler : ValidateLockAcces
 			return AccessDenied("Lock access code is invalid");
 		}
 
-		if (await DoesUserHaveAccessForLockAsync(lockObj.Id, user, cancellationToken))
-		{
-			await PublishLockAccessEvent(lockObj, user, AccessState.Allowed, null, cancellationToken);
-			return AccessAllowed();
-		}
-		else
-		{
-			await PublishLockAccessEvent(lockObj, user, AccessState.Denied,
-				AccessDeniedReason.DoesNotHaveAccessToLock, cancellationToken);
-			return AccessDenied("User does not have access to the lock");
-		}
+		return await DoesUserHaveAccessForLockAsync(lockObj, user, cancellationToken);
 	}
 }

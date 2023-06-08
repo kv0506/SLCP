@@ -10,8 +10,6 @@ public class GetLockAccessLogQuery : IRequest<QueryResult<LockAccessLog>>
 
 	public Guid? LockId { get; set; }
 
-	public Guid? OrganizationId { get; set;}
-
 	public int PageSize { get; set; }
 
 	public string? ContinuationToken { get; set; }

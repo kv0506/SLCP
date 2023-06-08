@@ -10,8 +10,8 @@ namespace SLCP.Business.Handler.Request;
 
 public class ValidateLockAccessCommandHandler
 {
-	private readonly IMediator _mediator;
-	private readonly IRequestContext _requestContext;
+	protected readonly IMediator Mediator;
+	protected readonly IRequestContext RequestContext;
 	protected readonly IUserRepository UserRepository;
 	protected readonly ILockRepository LockRepository;
 	protected readonly ILockGroupRepository LockGroupRepository;
@@ -22,27 +22,32 @@ public class ValidateLockAccessCommandHandler
 		UserRepository = userRepository;
 		LockRepository = lockRepository;
 		LockGroupRepository = lockGroupRepository;
-		_mediator = mediator;
-		_requestContext = requestContext;
+		RequestContext = requestContext;
+		Mediator = mediator;
 	}
 
-	protected async Task<bool> DoesUserHaveAccessForLockAsync(Guid lockId, User userObj,
+	protected async Task<LockAccessResponse> DoesUserHaveAccessForLockAsync(Lock lockObj, User userObj,
 		CancellationToken cancellationToken)
 	{
 		var lockGroups =
-			await LockGroupRepository.GetByLockIdAsync(lockId, _requestContext.OrganizationId, cancellationToken);
+			await LockGroupRepository.GetByLockIdAsync(lockObj.Id, RequestContext.OrganizationId, cancellationToken);
 
 		if (lockGroups.Any(x => userObj.PermittedLockGroups.Any(y => y.Id == x.Id)))
 		{
-			return true;
+			await PublishOpenLockEvent(lockObj, cancellationToken);
+			await PublishLockAccessEvent(lockObj, userObj, AccessState.Allowed, null, cancellationToken);
+			return AccessAllowed();
 		}
 
-		return false;
+		await PublishLockAccessEvent(lockObj, userObj, AccessState.Denied,
+			AccessDeniedReason.DoesNotHaveAccessToLock, cancellationToken);
+
+		return AccessDenied("User does not have access to the lock");
 	}
 
 	protected async Task<Lock> GetLockAsync(Guid lockId, CancellationToken cancellationToken)
 	{
-		var lockObj = await LockRepository.GetByIdAsync(lockId, _requestContext.OrganizationId, cancellationToken);
+		var lockObj = await LockRepository.GetByIdAsync(lockId, RequestContext.OrganizationId, cancellationToken);
 		if (lockObj == null)
 		{
 			throw new AppBusinessException($"Lock [Id={lockId}] does not exist");
@@ -53,7 +58,7 @@ public class ValidateLockAccessCommandHandler
 
 	protected async Task<User> GetUserAsync(Guid userId, CancellationToken cancellationToken)
 	{
-		var user = await UserRepository.GetByIdAsync(userId, _requestContext.OrganizationId, cancellationToken);
+		var user = await UserRepository.GetByIdAsync(userId, RequestContext.OrganizationId, cancellationToken);
 		if (user == null)
 		{
 			throw new AppBusinessException($"User [Id={userId}] does not exist");
@@ -65,8 +70,13 @@ public class ValidateLockAccessCommandHandler
 	protected async Task PublishLockAccessEvent(Lock lockObj, User? user, AccessState accessState,
 		AccessDeniedReason? accessDeniedReason, CancellationToken cancellationToken)
 	{
-		await _mediator.Publish(new LockAccessedEvent(lockObj, user, accessState, accessDeniedReason),
+		await Mediator.Publish(new LockAccessedEvent(lockObj, user, accessState, accessDeniedReason),
 			cancellationToken);
+	}
+
+	protected async Task PublishOpenLockEvent(Lock lockObj, CancellationToken cancellationToken)
+	{
+		await Mediator.Publish(new OpenLockEvent(lockObj), cancellationToken);
 	}
 
 	protected LockAccessResponse AccessDenied(string message)

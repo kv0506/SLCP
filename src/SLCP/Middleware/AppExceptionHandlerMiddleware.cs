@@ -1,5 +1,4 @@
-﻿using SLCP.API.Exception;
-using System.Net;
+﻿using System.Net;
 using System.Runtime.ExceptionServices;
 using System.Security.Authentication;
 using System.Text.Json;
@@ -67,20 +66,15 @@ public class AppExceptionHandlerMiddleware
 				}
 			};
 
-			if (exception.SourceException is AppModelValidationException validationEx)
+			if (exception.SourceException is FluentValidation.ValidationException fluentValidationEx)
 			{
 				status = 400;
-				response.Errors = validationEx.Errors;
+				response.Errors = fluentValidationEx.Errors.Select(x => x.ErrorMessage).ToList();
 			}
-			else if (exception.SourceException is AppBusinessException businessEx)
+			else if (exception.SourceException is AppBusinessException || exception.SourceException is AppDomainException)
 			{
 				status = 400;
-				response.Errors = new List<string>{ businessEx.Message };
-			}
-			else if (exception.SourceException is AppDomainException domainEx)
-			{
-				status = 400;
-				response.Errors = new List<string> { domainEx.Message };
+				response.Errors = new List<string>{ exception.SourceException.Message };
 			}
 			else if (exception.SourceException is AuthenticationException authenticationEx)
 			{
@@ -92,7 +86,7 @@ public class AppExceptionHandlerMiddleware
 			await context.Response.WriteAsync(JsonSerializer.Serialize(response));
 			await context.Response.Body.FlushAsync();
 		}
-		catch (System.Exception ex)
+		catch (Exception ex)
 		{
 			_logger.LogError(ex, ex.Message);
 		}
