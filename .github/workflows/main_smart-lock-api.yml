@@ -26,7 +26,7 @@ jobs:
         run: dotnet build ./src/SLCP/SLCP.sln --configuration Release -o ${{env.DOTNET_ROOT}}\slcp
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}\slcp
+        run: dotnet publish ./src/SLCP/SLCP.sln -c Release -o ${{env.DOTNET_ROOT}}\slcp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
