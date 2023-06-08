@@ -28,12 +28,12 @@ public class LockAccessLogRepository : ILockAccessLogRepository
 
 		if (lockId.IsNotNullOrEmpty())
 		{
-			queryBuilder.Append($"WHERE c.lock.id = {lockId?.ToHyphens()}");
+			queryBuilder.Append($"WHERE c.lock.id = '{lockId?.ToHyphens()}'");
 		}
 
 		if (userId.IsNotNullOrEmpty())
 		{
-			queryBuilder.Append($" {(lockId.IsNotNullOrEmpty() ? "AND" : "WHERE")} c.user.id = {userId?.ToHyphens()}");
+			queryBuilder.Append($" {(lockId.IsNotNullOrEmpty() ? "AND" : "WHERE")} c.user.id = '{userId?.ToHyphens()}'");
 		}
 
 		return await _cosmosService.GetItemsAsync<LockAccessLog>(ContainerNames.LockAccessLogs, queryBuilder.ToString(), maxIemCount, continuationToken, orgId?.ToHyphens(), cancellationToken);
