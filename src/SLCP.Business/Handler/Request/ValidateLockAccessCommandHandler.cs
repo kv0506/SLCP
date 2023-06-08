@@ -12,16 +12,11 @@ public class ValidateLockAccessCommandHandler
 {
 	protected readonly IMediator Mediator;
 	protected readonly IRequestContext RequestContext;
-	protected readonly IUserRepository UserRepository;
 	protected readonly ILockRepository LockRepository;
-	protected readonly ILockGroupRepository LockGroupRepository;
-	
-	public ValidateLockAccessCommandHandler(IUserRepository userRepository, ILockRepository lockRepository,
-		ILockGroupRepository lockGroupRepository, IMediator mediator, IRequestContext requestContext)
+
+	public ValidateLockAccessCommandHandler(ILockRepository lockRepository, IMediator mediator, IRequestContext requestContext)
 	{
-		UserRepository = userRepository;
 		LockRepository = lockRepository;
-		LockGroupRepository = lockGroupRepository;
 		RequestContext = requestContext;
 		Mediator = mediator;
 	}
@@ -29,10 +24,7 @@ public class ValidateLockAccessCommandHandler
 	protected async Task<LockAccessResponse> DoesUserHaveAccessForLockAsync(Lock lockObj, User userObj,
 		CancellationToken cancellationToken)
 	{
-		var lockGroups =
-			await LockGroupRepository.GetByLockIdAsync(lockObj.Id, RequestContext.OrganizationId, cancellationToken);
-
-		if (lockGroups.Any(x => userObj.PermittedLockGroups.Any(y => y.Id == x.Id)))
+		if (userObj.PermittedLockGroups.SelectMany(x => x.Locks).Any(x => x.Id == lockObj.Id))
 		{
 			await PublishOpenLockEvent(lockObj, cancellationToken);
 			await PublishLockAccessEvent(lockObj, userObj, AccessState.Allowed, null, cancellationToken);
@@ -54,17 +46,6 @@ public class ValidateLockAccessCommandHandler
 		}
 
 		return lockObj;
-	}
-
-	protected async Task<User> GetUserAsync(Guid userId, CancellationToken cancellationToken)
-	{
-		var user = await UserRepository.GetByIdAsync(userId, RequestContext.OrganizationId, cancellationToken);
-		if (user == null)
-		{
-			throw new AppBusinessException($"User [Id={userId}] does not exist");
-		}
-
-		return user;
 	}
 
 	protected async Task PublishLockAccessEvent(Lock lockObj, User? user, AccessState accessState,

@@ -15,6 +15,6 @@ public class OpenLockEventHandler : INotificationHandler<OpenLockEvent>
 
 	public async Task Handle(OpenLockEvent notification, CancellationToken cancellationToken)
 	{
-		await _mediator.Send(new OpenLockCommand { Lock = notification.Lock });
+		await _mediator.Send(new OpenLockCommand { Lock = notification.Lock }, cancellationToken);
 	}
 }

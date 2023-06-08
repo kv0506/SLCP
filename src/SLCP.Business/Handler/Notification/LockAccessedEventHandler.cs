@@ -1,30 +1,26 @@
 ﻿using MediatR;
 using SLCP.Business.Notification;
-using SLCP.DataAccess.Repositories.Contracts;
-using SLCP.ServiceModel;
+using SLCP.Business.Request;
 
 namespace SLCP.Business.Handler.Notification;
 
 public class LockAccessedEventHandler : INotificationHandler<LockAccessedEvent>
 {
-	private readonly ILockAccessLogRepository _lockAccessLogRepository;
+	private readonly IMediator _mediator;
 
-	public LockAccessedEventHandler(ILockAccessLogRepository lockAccessLogRepository)
+	public LockAccessedEventHandler(IMediator mediator)
 	{
-		_lockAccessLogRepository = lockAccessLogRepository;
+		_mediator = mediator;
 	}
 
 	public async Task Handle(LockAccessedEvent notification, CancellationToken cancellationToken)
 	{
-		await _lockAccessLogRepository.CreateItemAsync(new LockAccessLog
+		await _mediator.Send(new CreateLockAccessLogCommand
 		{
-			Id = Guid.NewGuid(),
-			OrganizationId = notification.Lock.OrganizationId,
-			Lock = notification.Lock,
 			User = notification.User,
+			Lock = notification.Lock,
 			AccessState = notification.AccessState,
-			AccessDeniedReason = notification.AccessDeniedReason,
-			AccessedDateTime = DateTimeOffset.UtcNow
+			AccessDeniedReason = notification.AccessDeniedReason
 		}, cancellationToken);
 	}
 }
