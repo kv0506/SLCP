@@ -72,7 +72,7 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 
 		_userRepositoryMock
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(() => new User { LockAccessCode = "12345678" });
+			.ReturnsAsync(() => new User { LockAccessCodeHash = "12345678" });
 
 		var command = new ValidateLockAccessUsingAccessCodeCommand
 		{
@@ -110,10 +110,10 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
 			.ReturnsAsync(() => new User
 			{
-				LockAccessCode = "123456",
-				PermittedLockGroups = new List<LockGroup>
+				LockAccessCodeHash = "123456",
+				Tags = new List<Location>
 				{
-					new LockGroup
+					new Location
 					{
 						Locks = new List<Lock>
 						{
@@ -163,9 +163,9 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
 			.ReturnsAsync(() => new User
 			{
-				LockAccessCode = "123456", PermittedLockGroups = new List<LockGroup>
+				LockAccessCodeHash = "123456", Tags = new List<Location>
 				{
-					new LockGroup
+					new Location
 					{
 						Locks = new List<Lock>
 						{

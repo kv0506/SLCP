@@ -6,6 +6,6 @@ public interface ILockAccessLogRepository
 {
 	Task<LockAccessLog> CreateItemAsync(LockAccessLog accessLog, CancellationToken cancellationToken);
 
-	Task<QueryResult<LockAccessLog>> GetItemsAsync(Guid? lockId, Guid? userId, Guid? orgId, int maxIemCount,
+	Task<QueryResult<LockAccessLog>> GetItemsAsync(Guid? lockId, Guid? userId, Guid locationId, int maxIemCount,
 		string? continuationToken, CancellationToken cancellationToken);
 }

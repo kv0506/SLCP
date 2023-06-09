@@ -108,9 +108,9 @@ public class ValidateLockAccessUsingAccessTagCommandHandlerTests
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
 			.ReturnsAsync(() => new AccessTag { User = new User
 			{
-				PermittedLockGroups = new List<LockGroup>
+				Tags = new List<Location>
 				{
-					new LockGroup
+					new Location
 					{
 						Locks = new List<Lock>
 						{
@@ -163,9 +163,9 @@ public class ValidateLockAccessUsingAccessTagCommandHandlerTests
 			{
 				User = new User
 				{
-					PermittedLockGroups = new List<LockGroup>
+					Tags = new List<Location>
 					{
-						new LockGroup
+						new Location
 						{
 							Locks = new List<Lock>
 							{

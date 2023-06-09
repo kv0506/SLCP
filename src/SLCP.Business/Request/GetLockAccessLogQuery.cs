@@ -6,6 +6,8 @@ namespace SLCP.Business.Request;
 
 public class GetLockAccessLogQuery : IRequest<QueryResult<LockAccessLog>>
 {
+	public Guid LocationId { get; set; }
+
 	public Guid? UserId { get; set; }
 
 	public Guid? LockId { get; set; }

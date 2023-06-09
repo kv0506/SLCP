@@ -31,6 +31,7 @@ public class CreateLockAccessLogCommandHandler : IRequestHandler<CreateLockAcces
 			AccessState = request.AccessState,
 			AccessDeniedReason = request.AccessDeniedReason,
 			AccessedDateTime = DateTimeOffset.Now,
+			LocationId = request.Lock.LocationId,
 			OrganizationId = request.Lock.OrganizationId
 		};
 

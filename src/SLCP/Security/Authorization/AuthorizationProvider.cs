@@ -18,6 +18,12 @@ public class AuthorizationProvider : IAuthorizationProvider
 
 	public async Task AuthorizeAsync(ActionExecutingContext context, CancellationToken cancellationToken)
 	{
+		ValidateRole(context);
+		ValidateLocation(context);
+	}
+
+	private void ValidateRole(ActionExecutingContext context)
+	{
 		if (_requestContext.UserId.IsNotNullOrEmpty())
 		{
 			var allowAnonymousAttribute =
@@ -52,5 +58,61 @@ public class AuthorizationProvider : IAuthorizationProvider
 
 			throw new AuthenticationException(ErrorCode.Unauthorized, "This api is not allowed for key based authentication");
 		}
+	}
+
+	public void ValidateLocation(ActionExecutingContext context)
+	{
+		// ignore identifier check for admin since they can crud on all records
+		if (_requestContext.UserRole == Roles.SystemAdmin)
+			return;
+
+		// add the authenticated locationIds to authorized list. every user can act on their own record
+		var authorizedIdentifiers = _requestContext.Locations;
+
+		// get all location ids which needs to be authorized
+		var locationIds = GetLocationIdentifiers(context.ActionArguments);
+
+		foreach (var locationId in locationIds)
+		{
+			if (locationId.IsNotNullOrEmpty() && !(authorizedIdentifiers?.Contains(locationId.GetValueOrDefault()) ?? false))
+			{
+				throw new AuthenticationException(ErrorCode.Unauthorized,
+					"You do not have access to locations mentioned in the request");
+			}
+		}
+	}
+
+	private List<Guid?> GetLocationIdentifiers(IDictionary<string, object> actionParameters)
+	{
+		var locationIds = new List<Guid?>();
+
+		foreach (var parameter in actionParameters)
+		{
+			if (parameter.Value == null)
+				continue;
+
+			if (parameter.Key.IsEquals("locationId", StringComparison.InvariantCultureIgnoreCase))
+			{
+				locationIds.Add(Guid.TryParse(parameter.Value.ToString(), out var id) ? id : (Guid?)null);
+			}
+
+			if (parameter.Value.GetType().IsClass)
+			{
+				var properties = parameter.Value.GetType().GetProperties();
+				foreach (var property in properties)
+				{
+					if (property.Name.EndsWith("locationId", StringComparison.InvariantCultureIgnoreCase))
+					{
+						var propertyValue = property.GetValue(parameter.Value);
+						if (propertyValue != null)
+						{
+							locationIds.Add(Guid.TryParse(parameter.Value.ToString(), out var id) ? id : (Guid?)null);
+						}
+					}
+				}
+			}
+		}
+
+		return locationIds;
 	}
 }

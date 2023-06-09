@@ -10,13 +10,15 @@ public class User
 
 	public string PasswordHash { get; set; }
 
-	public string PasswordSalt { get; set; }
+	public string Salt { get; set; }
 
 	public string Role { get; set; }
 
-	public string LockAccessCode { get; set; }
+	public string LockAccessCodeHash { get; set; }
 
-	public IList<LockGroup> PermittedLockGroups { get; set; }
+	public IList<Guid> Tags { get; set; }
+
+	public IList<Guid> Locations { get; set; }
 
 	public Guid OrganizationId { get; set; }
 }

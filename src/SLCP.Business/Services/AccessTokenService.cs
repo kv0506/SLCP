@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using SLCP.Core;
 using SLCP.ServiceModel;
@@ -17,7 +18,8 @@ public class AccessTokenService : IAccessTokenService
 {
 	private const string Id = "id";
 	private const string Role = "role";
-	private const string OrganizationClaim = "organization";
+	private const string Locations = "locations";
+	private const string Organization = "organization";
 
 	private readonly AccessTokenServiceSettings _settings;
 
@@ -37,10 +39,12 @@ public class AccessTokenService : IAccessTokenService
 			{
 				new Claim(Id, user.Id.ToHyphens()),
 				new Claim(Role, user.Role),
-				new Claim(OrganizationClaim, user.OrganizationId.ToHyphens())
+				new Claim(Locations, JsonSerializer.Serialize(user.Locations)),
+				new Claim(Organization, user.OrganizationId.ToHyphens())
 			}),
 			Expires = DateTime.UtcNow.AddMinutes(_settings.ExpiryInMinutes),
-			SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+			SigningCredentials =
+				new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 		};
 
 		var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -74,7 +78,10 @@ public class AccessTokenService : IAccessTokenService
 					case Role:
 						user.Role = claim.Value;
 						break;
-					case OrganizationClaim:
+					case Locations:
+						user.Locations = JsonSerializer.Deserialize<IList<Guid>>(claim.Value);
+						break;
+					case Organization:
 						user.OrganizationId = Guid.Parse(claim.Value);
 						break;
 				}

@@ -5,6 +5,7 @@ using Autofac.Extensions.DependencyInjection;
 using MediatR.Extensions.FluentValidation.AspNetCore;
 using SLCP.API;
 using SLCP.API.Middleware;
+using SLCP.API.ModelBinding;
 using SLCP.API.Security.Attributes;
 using SLCP.Business;
 using SLCP.Business.Services;
@@ -38,7 +39,7 @@ builder.Services.AddControllers(options =>
 }).AddJsonOptions(options =>
 {
 	options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-});
+}).AddBodyAndRouteModelBinder();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -50,7 +51,7 @@ var app = builder.Build();
 app.UseAppExceptionHandler();
 
 // used for setting up data for testing
-//app.Services.GetService<IDataSeeder>().SeedData(CancellationToken.None);
+app.Services.GetService<IDataSeeder>().SeedData(CancellationToken.None);
 
 app.UseSwagger();
 app.UseSwaggerUI();

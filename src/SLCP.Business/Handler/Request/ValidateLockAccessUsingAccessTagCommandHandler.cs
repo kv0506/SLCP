@@ -13,9 +13,9 @@ public class ValidateLockAccessUsingAccessTagCommandHandler : ValidateLockAccess
 {
 	private readonly IAccessTagRepository _accessTagRepository;
 
-	public ValidateLockAccessUsingAccessTagCommandHandler(ILockRepository lockRepository,
-		IAccessTagRepository accessTagRepository,
-		IMediator mediator, IRequestContext requestContext) : base(lockRepository, mediator, requestContext)
+	public ValidateLockAccessUsingAccessTagCommandHandler(IUserAccessGroupRepository userAccessGroupRepository,
+		IAccessTagRepository accessTagRepository, IMediator mediator, IRequestContext requestContext) :
+		base(userAccessGroupRepository, mediator, requestContext)
 	{
 		_accessTagRepository = accessTagRepository;
 	}
@@ -23,19 +23,20 @@ public class ValidateLockAccessUsingAccessTagCommandHandler : ValidateLockAccess
 	public async Task<LockAccessResponse> Handle(ValidateLockAccessUsingAccessTagCommand request,
 		CancellationToken cancellationToken)
 	{
-		var lockObj = await GetLockAsync(request.LockId, cancellationToken);
-
-		var accessTag = await GetAccessTagAsync(request.AccessTagId, RequestContext.OrganizationId,
+		var accessTag = await GetAccessTagAsync(request.AccessTagId, request.LocationId,
 			cancellationToken);
 
 		if (accessTag.IsBlocked)
 		{
-			await PublishLockAccessEvent(lockObj, accessTag.User, AccessState.Denied,
-				AccessDeniedReason.AccessTagBlocked, cancellationToken);
+			await PublishLockAccessEvent(new Lock
+			{
+				Id = request.LockId, LocationId = request.LocationId, OrganizationId = RequestContext.OrganizationId
+			}, accessTag.User, AccessState.Denied, AccessDeniedReason.AccessTagBlocked, cancellationToken);
+
 			return AccessDenied(ErrorCode.AccessTagIsBlocked, $"AccessTag [Id={request.AccessTagId}] is blocked");
 		}
 
-		return await DoesUserHaveAccessForLockAsync(lockObj, accessTag.User, cancellationToken);
+		return await DoesUserHaveAccessForLockAsync(request, accessTag.User, cancellationToken);
 	}
 
 	private async Task<AccessTag> GetAccessTagAsync(Guid accessTagId, Guid orgId, CancellationToken cancellationToken)

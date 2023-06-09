@@ -69,6 +69,7 @@ public class AuthenticationProvider : IAuthenticationProvider
 
 			_requestContext.UserId = user.Id;
 			_requestContext.UserRole = user.Role;
+			_requestContext.Locations = user.Locations;
 			_requestContext.OrganizationId = user.OrganizationId;
 		}
 		else
@@ -87,6 +88,7 @@ public class AuthenticationProvider : IAuthenticationProvider
 			if (apiKey != null)
 			{
 				_requestContext.ApiKeyId = apiKey.Id;
+				_requestContext.Locations = new List<Guid> { apiKey.LocationId };
 				_requestContext.OrganizationId = apiKey.OrganizationId;
 			}
 			else

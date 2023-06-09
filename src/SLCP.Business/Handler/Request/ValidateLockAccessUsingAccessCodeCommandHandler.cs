@@ -1,5 +1,4 @@
-﻿using CSharpExtensions;
-using MediatR;
+﻿using MediatR;
 using SLCP.Business.Request;
 using SLCP.Business.Response;
 using SLCP.Business.Services;
@@ -15,8 +14,8 @@ public class ValidateLockAccessUsingAccessCodeCommandHandler : ValidateLockAcces
 	private readonly IUserRepository _userRepository;
 
 	public ValidateLockAccessUsingAccessCodeCommandHandler(IUserRepository userRepository,
-		ILockRepository lockRepository, IMediator mediator, IRequestContext requestContext) : 
-		base(lockRepository, mediator, requestContext)
+		IUserAccessGroupRepository userAccessGroupRepository, IMediator mediator, IRequestContext requestContext) :
+		base(userAccessGroupRepository, mediator, requestContext)
 	{
 		_userRepository = userRepository;
 	}
@@ -24,17 +23,19 @@ public class ValidateLockAccessUsingAccessCodeCommandHandler : ValidateLockAcces
 	public async Task<LockAccessResponse> Handle(ValidateLockAccessUsingAccessCodeCommand request,
 		CancellationToken cancellationToken)
 	{
-		var lockObj = await GetLockAsync(request.LockId, cancellationToken);
 		var user = await GetUserAsync(RequestContext.UserId.GetValueOrDefault(), cancellationToken);
 
-		if (request.UserLockAccessCode.IsNotEquals(user.LockAccessCode))
+		if (!HashService.VerifyHash(request.UserLockAccessCode, user.Salt, user.LockAccessCodeHash))
 		{
-			await PublishLockAccessEvent(lockObj, user, AccessState.Denied,
-				AccessDeniedReason.InvalidUserLockAccessCode, cancellationToken);
-			return AccessDenied( ErrorCode.InvalidAccessCode,"Lock access code is invalid");
+			await PublishLockAccessEvent(new Lock
+				{
+					Id = request.LockId, LocationId = request.LocationId, OrganizationId = RequestContext.OrganizationId
+				}, user, AccessState.Denied, AccessDeniedReason.InvalidUserLockAccessCode, cancellationToken);
+
+			return AccessDenied(ErrorCode.InvalidAccessCode, "Lock access code is invalid");
 		}
 
-		return await DoesUserHaveAccessForLockAsync(lockObj, user, cancellationToken);
+		return await DoesUserHaveAccessForLockAsync(request, user, cancellationToken);
 	}
 
 	private async Task<User> GetUserAsync(Guid userId, CancellationToken cancellationToken)

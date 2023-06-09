@@ -4,7 +4,5 @@ namespace SLCP.DataAccess.Repositories.Contracts;
 
 public interface ILockRepository
 {
-	Task<Lock> GetByIdAsync(Guid id, Guid? orgId, CancellationToken cancellationToken);
-
-	Task<IList<Lock>> GetByOrganizationIdAsync(Guid orgId, CancellationToken cancellationToken);
+	Task<Lock> GetByIdAsync(Guid id, Guid locationId, CancellationToken cancellationToken);
 }
