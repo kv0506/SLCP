@@ -19,6 +19,7 @@
   <ItemGroup>
     <Folder Include="Model\" />
     <Folder Include="Middleware\" />
+    <Folder Include="ModelBinding\" />
     <Folder Include="Security\Authentication\" />
     <Folder Include="Security\Authorization\" />
   </ItemGroup>

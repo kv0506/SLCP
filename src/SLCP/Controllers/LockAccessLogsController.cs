@@ -6,7 +6,7 @@ using SLCP.Core;
 
 namespace SLCP.API.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("api/locations/{locationId}/[controller]")]
 	public class LockAccessLogsController : AppControllerBase
 	{
 		private readonly IMediator _mediator;
@@ -18,8 +18,10 @@ namespace SLCP.API.Controllers
 
 		[HttpGet]
 		[AuthorizedRoles(Roles.SecurityAdmin)]
-		public async Task<IActionResult> Get([FromQuery] GetLockAccessLogQuery request)
+		public async Task<IActionResult> Get([FromRoute] Guid locationId, [FromQuery] GetLockAccessLogQuery request)
 		{
+			//workaround. ideally we need a FromRouteAndQuery binding option
+			request.LocationId = locationId;
 			return Ok(Success(await _mediator.Send(request)));
 		}
 	}

@@ -14,9 +14,9 @@ public class AccessTagRepository : IAccessTagRepository
 		_cosmosService = cosmosService;
 	}
 
-	public async Task<AccessTag> GetByIdAsync(Guid id, Guid? orgId, CancellationToken cancellationToken)
+	public async Task<AccessTag> GetByIdAsync(Guid id, Guid locationId, CancellationToken cancellationToken)
 	{
-		return await _cosmosService.GetItemAsync<AccessTag>(ContainerNames.AccessTags, id.ToHyphens(), orgId?.ToHyphens(),
+		return await _cosmosService.GetItemAsync<AccessTag>(ContainerNames.AccessTags, id.ToHyphens(), locationId.ToHyphens(),
 			cancellationToken);
 	}
 }

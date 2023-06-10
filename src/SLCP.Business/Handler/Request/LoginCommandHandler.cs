@@ -26,7 +26,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 			throw new AppException(ErrorCode.InvalidUsernameOrPassword, "Invalid email address or password");
 		}
 
-		if (HashService.VerifyHash(request.Password, user.PasswordSalt, user.PasswordHash))
+		if (HashService.VerifyHash(request.Password, user.Salt, user.PasswordHash))
 		{
 			var accessToken = _accessTokenService.CreateToken(user);
 			return new LoginResponse

@@ -1,6 +1,6 @@
 ﻿namespace SLCP.ServiceModel;
 
-public class Lock
+public class Location
 {
 	public Guid Id { get; set; }
 
@@ -8,9 +8,7 @@ public class Lock
 
 	public string Description { get; set; }
 
-	public bool IsEnabled { get; set; }
-
-	public Guid LocationId { get; set; }
+	public IList<Lock> Locks { get; set; }
 
 	public Guid OrganizationId { get; set; }
 }

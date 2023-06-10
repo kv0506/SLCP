@@ -17,131 +17,138 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 {
 	private IRequestHandler<ValidateLockAccessUsingAccessCodeCommand, LockAccessResponse> _handler;
 	private Mock<IUserRepository> _userRepositoryMock;
-	private Mock<ILockRepository> _lockRepositoryMock;
+	private Mock<IUserAccessGroupRepository> _userAccessGroupRepositoryMock;
 	private Mock<IMediator> _mediatorMock;
 	private Mock<IRequestContext> _requestContextMock;
 
 	private readonly Guid _orgId = Guid.NewGuid();
+	private readonly Guid _locationId = Guid.NewGuid();
 	private readonly Guid _userId = Guid.NewGuid();
 
 	[SetUp]
 	public void Setup()
 	{
 		_userRepositoryMock = new Mock<IUserRepository>();
-		_lockRepositoryMock = new Mock<ILockRepository>();
+		_userAccessGroupRepositoryMock = new Mock<IUserAccessGroupRepository>();
 		_mediatorMock = new Mock<IMediator>();
 		_requestContextMock = new Mock<IRequestContext>();
 
 		_handler = new ValidateLockAccessUsingAccessCodeCommandHandler(_userRepositoryMock.Object,
-			_lockRepositoryMock.Object, _mediatorMock.Object, _requestContextMock.Object);
+			_userAccessGroupRepositoryMock.Object, _mediatorMock.Object, _requestContextMock.Object);
 
-		_requestContextMock.SetupGet(x => x.OrganizationId).Returns(_orgId);
 		_requestContextMock.SetupGet(x => x.UserId).Returns(_userId);
+		_requestContextMock.SetupGet(x => x.Locations).Returns(new List<Guid>() { _locationId });
+		_requestContextMock.SetupGet(x => x.OrganizationId).Returns(_orgId);
 	}
 
 	[Test]
 	public async Task Handle_ValidateLockAccessUsingAccessCodeCommand_ThrowsException_When_LockIsInvalid()
 	{
-		_lockRepositoryMock
-			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+		_userAccessGroupRepositoryMock
+			.Setup(x => x.GetByLockIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
 			.ThrowsAsync(new AppException(ErrorCode.NotFound, string.Empty));
 
 		_userRepositoryMock
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(() => new User());
+			.ReturnsAsync(() => new User{LockAccessCodeHash = "uF42wQprBRJdWoacjU+M3+bBSwV+KtgpH8fJPQJwyDg=", Salt = "5691519521109491810" });
 
 		var command = new ValidateLockAccessUsingAccessCodeCommand
 		{
 			LockId = Guid.NewGuid(),
-			UserLockAccessCode = "123456"
+			LocationId = Guid.NewGuid(),
+			UserLockAccessCode = "12345678"
 		};
 
 		var exception = await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
 		exception.ErrorCode.ShouldBe(ErrorCode.NotFound);
 
-		_lockRepositoryMock.Verify(x=>x.GetByIdAsync(command.LockId,_orgId, It.IsAny<CancellationToken>()), Times.Once);
-		_userRepositoryMock.Verify(x=>x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()),Times.Never);
+		_userAccessGroupRepositoryMock.Verify(
+			x => x.GetByLockIdAsync(command.LockId, command.LocationId, It.IsAny<CancellationToken>()), Times.Once);
+		_userRepositoryMock.Verify(
+			x => x.GetByIdAsync(_userId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 	}
 
 	[Test]
 	public async Task Handle_ValidateLockAccessUsingAccessCodeCommand_ThrowsException_When_UserAccessCodeIsWrong()
 	{
-		_lockRepositoryMock
-			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(() => new Lock());
+		_userAccessGroupRepositoryMock
+			.Setup(x => x.GetByLockIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(() => new List<UserAccessGroup>());
 
 		_userRepositoryMock
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(() => new User { LockAccessCode = "12345678" });
+			.ReturnsAsync(() => new User { LockAccessCodeHash = "uF42wQprBRJdWoacjU+M3+bBSwV+KtgpH8fJPQJwyDg=", Salt = "5691519521109491810" });
 
 		var command = new ValidateLockAccessUsingAccessCodeCommand
 		{
 			LockId = Guid.NewGuid(),
+			LocationId = Guid.NewGuid(),
 			UserLockAccessCode = "123456"
 		};
 
-		var exception = await Should.ThrowAsync<AppException>(()=> _handler.Handle(command, CancellationToken.None));
+		var exception = await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
 		exception.ErrorCode.ShouldBe(ErrorCode.InvalidAccessCode);
 
-		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
-		_userRepositoryMock.Verify(x => x.GetByIdAsync(_userId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
+		_userAccessGroupRepositoryMock.Verify(
+			x => x.GetByLockIdAsync(command.LockId, command.LocationId, It.IsAny<CancellationToken>()), Times.Never);
+		_userRepositoryMock.Verify(x => x.GetByIdAsync(_userId, _orgId, It.IsAny<CancellationToken>()),
+			Times.Once);
 
 		_mediatorMock.Verify(x => x.Publish(
-				It.Is<LockAccessedEvent>(lockAccessedEvent => lockAccessedEvent.AccessState == AccessState.Denied &&
-				                                              lockAccessedEvent.AccessDeniedReason == AccessDeniedReason.InvalidUserLockAccessCode),
-				It.IsAny<CancellationToken>()), Times.Once);
+			It.Is<LockAccessedEvent>(lockAccessedEvent => lockAccessedEvent.AccessState == AccessState.Denied &&
+			                                              lockAccessedEvent.AccessDeniedReason ==
+			                                              AccessDeniedReason.InvalidUserLockAccessCode),
+			It.IsAny<CancellationToken>()), Times.Once);
 	}
 
 	[Test]
 	public async Task Handle_ValidateLockAccessUsingAccessCodeCommand_Returns_AccessDenied_When_UserDoesNotHaveAccess()
 	{
-		var lockObj = new Lock
-		{
-			Id = Guid.NewGuid(),
-			IsEnabled = true,
-			OrganizationId = _orgId
-		};
+		var lockId = Guid.NewGuid();
 
-		_lockRepositoryMock
-			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(() => lockObj);
-
-		_userRepositoryMock
-			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(() => new User
+		_userAccessGroupRepositoryMock
+			.Setup(x => x.GetByLockIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(() => new List<UserAccessGroup>
 			{
-				LockAccessCode = "123456",
-				PermittedLockGroups = new List<LockGroup>
+				new UserAccessGroup
 				{
-					new LockGroup
+					Locks = new List<Lock>
 					{
-						Locks = new List<Lock>
-						{
-							new Lock { Id = Guid.NewGuid() }
-						}
+						new Lock { Id = lockId }
+					},
+					Users = new List<User>
+					{
+						new User { Id = Guid.NewGuid() }
 					}
 				}
 			});
 
+		_userRepositoryMock
+			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(() => new User { LockAccessCodeHash = "uF42wQprBRJdWoacjU+M3+bBSwV+KtgpH8fJPQJwyDg=", Salt = "5691519521109491810" });
+
 		var command = new ValidateLockAccessUsingAccessCodeCommand
 		{
-			LockId = Guid.NewGuid(),
-			UserLockAccessCode = "123456"
+			LockId = lockId,
+			LocationId = Guid.NewGuid(),
+			UserLockAccessCode = "12345678"
 		};
 
 		var exception = await Should.ThrowAsync<AppException>(() => _handler.Handle(command, CancellationToken.None));
 		exception.ErrorCode.ShouldBe(ErrorCode.DoesNotHaveAccessToLock);
 
-		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
+		_userAccessGroupRepositoryMock.Verify(
+			x => x.GetByLockIdAsync(command.LockId, command.LocationId, It.IsAny<CancellationToken>()), Times.Once);
 		_userRepositoryMock.Verify(x => x.GetByIdAsync(_userId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 
 		_mediatorMock.Verify(x => x.Publish(
 			It.Is<LockAccessedEvent>(lockAccessedEvent => lockAccessedEvent.AccessState == AccessState.Denied &&
-			                                              lockAccessedEvent.AccessDeniedReason == AccessDeniedReason.DoesNotHaveAccessToLock),
+			                                              lockAccessedEvent.AccessDeniedReason ==
+			                                              AccessDeniedReason.DoesNotHaveAccessToLock),
 			It.IsAny<CancellationToken>()), Times.Once);
 
 		_mediatorMock.Verify(x => x.Publish(
-			It.Is<OpenLockEvent>(openLockEvent => openLockEvent.Lock.Id == lockObj.Id),
+			It.Is<OpenLockEvent>(openLockEvent => openLockEvent.Lock.Id == command.LockId),
 			It.IsAny<CancellationToken>()), Times.Never);
 	}
 
@@ -152,39 +159,47 @@ public class ValidateLockAccessUsingAccessCodeCommandHandlerTests
 		{
 			Id = Guid.NewGuid(),
 			IsEnabled = true,
+			LocationId = _locationId,
 			OrganizationId = _orgId
 		};
 
-		_lockRepositoryMock
-			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-			.ReturnsAsync(() => lockObj);
+		_userAccessGroupRepositoryMock
+			.Setup(x => x.GetByLockIdAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+			.ReturnsAsync(() => new List<UserAccessGroup>
+			{
+				new UserAccessGroup
+				{
+					Locks = new List<Lock>
+					{
+						lockObj
+					},
+					Users = new List<User>
+					{
+						new User { Id = _userId }
+					}
+				}
+			});
 
 		_userRepositoryMock
 			.Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
 			.ReturnsAsync(() => new User
 			{
-				LockAccessCode = "123456", PermittedLockGroups = new List<LockGroup>
-				{
-					new LockGroup
-					{
-						Locks = new List<Lock>
-						{
-							lockObj
-						}
-					}
-				}
+				Id = _userId,
+				LockAccessCodeHash = "uF42wQprBRJdWoacjU+M3+bBSwV+KtgpH8fJPQJwyDg=",
+				Salt = "5691519521109491810"
 			});
 
 		var command = new ValidateLockAccessUsingAccessCodeCommand
 		{
-			LockId = Guid.NewGuid(),
-			UserLockAccessCode = "123456"
+			LockId = lockObj.Id,
+			UserLockAccessCode = "12345678"
 		};
 
 		var response = await _handler.Handle(command, CancellationToken.None);
 		response.AccessAllowed.ShouldBeTrue();
 
-		_lockRepositoryMock.Verify(x => x.GetByIdAsync(command.LockId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
+		_userAccessGroupRepositoryMock.Verify(
+			x => x.GetByLockIdAsync(command.LockId, command.LocationId, It.IsAny<CancellationToken>()), Times.Once);
 		_userRepositoryMock.Verify(x => x.GetByIdAsync(_userId, _orgId, It.IsAny<CancellationToken>()), Times.Once);
 
 		_mediatorMock.Verify(x => x.Publish(

@@ -19,10 +19,10 @@ public class LockAccessLogRepository : ILockAccessLogRepository
 	public async Task<LockAccessLog> CreateItemAsync(LockAccessLog accessLog, CancellationToken cancellationToken)
 	{
 		return await _cosmosService.CreateItemAsync(ContainerNames.LockAccessLogs, accessLog,
-			accessLog.Lock.OrganizationId.ToHyphens(), cancellationToken);
+			accessLog.LocationId.ToHyphens(), cancellationToken);
 	}
 
-	public async Task<QueryResult<LockAccessLog>> GetItemsAsync(Guid? lockId, Guid? userId, Guid? orgId, int maxIemCount, string? continuationToken,
+	public async Task<QueryResult<LockAccessLog>> GetItemsAsync(Guid? lockId, Guid? userId, Guid locationId, int maxIemCount, string? continuationToken,
 		CancellationToken cancellationToken)
 	{
 		var queryBuilder = new StringBuilder("SELECT * FROM c ");
@@ -37,6 +37,6 @@ public class LockAccessLogRepository : ILockAccessLogRepository
 			queryBuilder.Append($" {(lockId.IsNotNullOrEmpty() ? "AND" : "WHERE")} c.user.id = '{userId?.ToHyphens()}'");
 		}
 
-		return await _cosmosService.GetItemsAsync<LockAccessLog>(ContainerNames.LockAccessLogs, queryBuilder.ToString(), maxIemCount, continuationToken, orgId?.ToHyphens(), cancellationToken);
+		return await _cosmosService.GetItemsAsync<LockAccessLog>(ContainerNames.LockAccessLogs, queryBuilder.ToString(), maxIemCount, continuationToken, locationId.ToHyphens(), cancellationToken);
 	}
 }

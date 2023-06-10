@@ -14,15 +14,9 @@ public class LockRepository : ILockRepository
 		_cosmosService = cosmosService;
 	}
 
-	public async Task<Lock> GetByIdAsync(Guid id, Guid? orgId, CancellationToken cancellationToken)
+	public async Task<Lock> GetByIdAsync(Guid id, Guid locationId, CancellationToken cancellationToken)
 	{
-		return await _cosmosService.GetItemAsync<Lock>(ContainerNames.Locks, id.ToHyphens(), orgId?.ToHyphens(),
+		return await _cosmosService.GetItemAsync<Lock>(ContainerNames.Locks, id.ToHyphens(), locationId.ToHyphens(),
 			cancellationToken);
-	}
-
-	public async Task<IList<Lock>> GetByOrganizationIdAsync(Guid orgId, CancellationToken cancellationToken)
-	{
-		var query = "SELECT * FROM c";
-		return await _cosmosService.GetItemsAsync<Lock>(ContainerNames.Locks, query, orgId.ToHyphens(), cancellationToken);
 	}
 }

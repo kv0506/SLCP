@@ -7,6 +7,7 @@ public class ValidateLockAccessUsingAccessTagCommandValidator : AbstractValidato
 {
 	public ValidateLockAccessUsingAccessTagCommandValidator()
 	{
+		RuleFor(x => x.LocationId).NotEmpty();
 		RuleFor(x => x.LockId).NotEmpty();
 		RuleFor(x => x.AccessTagId).NotEmpty();
 	}
