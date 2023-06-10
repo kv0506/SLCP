@@ -106,7 +106,7 @@ public class AuthorizationProvider : IAuthorizationProvider
 						var propertyValue = property.GetValue(parameter.Value);
 						if (propertyValue != null)
 						{
-							locationIds.Add(Guid.TryParse(parameter.Value.ToString(), out var id) ? id : (Guid?)null);
+							locationIds.Add(Guid.TryParse(propertyValue.ToString(), out var id) ? id : (Guid?)null);
 						}
 					}
 				}
