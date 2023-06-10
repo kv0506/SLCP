@@ -78,13 +78,15 @@ public class DataSeeder : IDataSeeder
 
 		var location1Locks = new List<Lock>
 		{
-			GetNewLockObject("Door1", location1), GetNewLockObject("Door2", location1), GetNewLockObject("Door3", location1),
+			GetNewLockObject("Door1", location1), GetNewLockObject("Door2", location1),
+			GetNewLockObject("Door3", location1),
 			GetNewLockObject("Door4", location1), GetNewLockObject("Door5", location1)
 		};
 
 		var location2Locks = new List<Lock>
 		{
-			GetNewLockObject("Door1", location2), GetNewLockObject("Door2", location2), GetNewLockObject("Door3", location2),
+			GetNewLockObject("Door1", location2), GetNewLockObject("Door2", location2),
+			GetNewLockObject("Door3", location2),
 		};
 
 		await CreateLocks(location1Locks);
@@ -97,12 +99,12 @@ public class DataSeeder : IDataSeeder
 
 		var users = new List<User>
 		{
-			GetNewUserObject("user1", Roles.Employee, org),
-			GetNewUserObject("user2", Roles.Employee, org),
-			GetNewUserObject("user3", Roles.SecurityAdmin, org),
-			GetNewUserObject("user4", Roles.Employee, org),
-			GetNewUserObject("user5", Roles.Employee, org),
-			GetNewUserObject("user6", Roles.SecurityAdmin, org),
+			GetNewUserObject("user1", Roles.Employee, org, location1),
+			GetNewUserObject("user2", Roles.Employee, org, location1),
+			GetNewUserObject("user3", Roles.SecurityAdmin, org, location1),
+			GetNewUserObject("user4", Roles.Employee, org, location2),
+			GetNewUserObject("user5", Roles.Employee, org, location2),
+			GetNewUserObject("user6", Roles.SecurityAdmin, org, location2),
 		};
 
 		var tags = new List<AccessTag>
@@ -125,7 +127,7 @@ public class DataSeeder : IDataSeeder
 				user.Tags = new List<Guid> { tag.Id };
 			}
 		}
-		
+
 		await CreateUsers(users);
 
 		var lockHubs = new List<LockHub>
@@ -209,7 +211,8 @@ public class DataSeeder : IDataSeeder
 	{
 		foreach (var accessGroup in accessGroups)
 		{
-			await _cosmosService.CreateItemAsync(ContainerNames.UserAccessGroups, accessGroup, accessGroup.LocationId.ToHyphens(),
+			await _cosmosService.CreateItemAsync(ContainerNames.UserAccessGroups, accessGroup,
+				accessGroup.LocationId.ToHyphens(),
 				CancellationToken.None);
 		}
 	}
@@ -226,7 +229,7 @@ public class DataSeeder : IDataSeeder
 		};
 	}
 
-	private User GetNewUserObject(string name, string role, Organization org)
+	private User GetNewUserObject(string name, string role, Organization org, Location location)
 	{
 		var user = new User
 		{
@@ -238,6 +241,7 @@ public class DataSeeder : IDataSeeder
 			LockAccessCodeHash = "uF42wQprBRJdWoacjU+M3+bBSwV+KtgpH8fJPQJwyDg=",
 			Role = role,
 			OrganizationId = org.Id,
+			Locations = new List<Guid> { location.Id },
 			Tags = new List<Guid>()
 		};
 

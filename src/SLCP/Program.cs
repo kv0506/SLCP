@@ -51,7 +51,7 @@ var app = builder.Build();
 app.UseAppExceptionHandler();
 
 // used for setting up data for testing
-app.Services.GetService<IDataSeeder>().SeedData(CancellationToken.None);
+//app.Services.GetService<IDataSeeder>().SeedData(CancellationToken.None);
 
 app.UseSwagger();
 app.UseSwaggerUI();
